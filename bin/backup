@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+$: << File.dirname(__FILE__) + "/../lib"
+
+begin
+  require 'rubygems'
+rescue LoadError
+  # no rubygems to load, so we fail silently
+end
+
+require 'backup/cli'
+
+Backup::CLI.execute!

@@ -1,0 +1,288 @@
+Thu Aug 17 19:44:40 PDT 2006
+
+Backup gem is the easiest and most flexible backup, archive and rotate
+tool. Inspired by Capistrano, a simple configuration will allow 
+anyone to specify:
+* what is being archived (files, folders, arbitrary scripts)  
+* how it's being archived (tar gzip, bz2)
+* where the archive is going (multiple backup servers? easy)           
+* how the archive is going to get there (scp, ftp, mv)
+* where is will be stored when it gets there
+* how it's going to be rotated when it gets there (grandfather-father-son, etc)
+* how often will this process happen (customizable cycles)
+* what happens to the working copy after the process (recreate files, folders etc. restart daemons)
+It's a beginning to end solution for scheduled backups in a clean ruby package.
+
+So that we can all speak the same language some terms are listed below:
+
+Glossary: 
+  Bundle:            Generic word for a collection of files being joined into
+                     one file. example: tar 
+  Compression:       Taking a file or Bundle and making it smaller. example:
+                     gzip, bz2
+  Working Copy:      The most up-to-date, or 'current' collection of
+                     uncompressed data to be stored.  
+  Package:           A Bundled and/or Compressed Working Copy 
+  Client:            Where the Working Copy is stored and, probably, where the
+                     Package is created 
+  Backup Server:     Where all Packages will be stored. Also known as simply
+                     "the Server".
+  Delivery Protocol: How the Package gets to the Server. Example: scp (via
+                     ssh), ftp
+
+*rotate* is a collection of scripts that is complete enough to save you
+time, but flexible enough to work with any situation.
+
+*rotate* uses a Grandfather-Father-Son rotation scheme that can be customized
+to the specific purposes.
+
+
+Assumptions:
+* the path, name, and password are the same for all servers
+* server and client understand POSIX commmands
+
+==Use Cases==
+===XML feed logs===
+
+There is a group of files in /var/us/feeds
+create a new directory
+move the files into the new directory
+tar bz2 it
+move it to the external harddisk
+After 30 days, delete the last one.
+
+package :contents_of => "/var/us/feeds",  # package :folder => "/foo/folder" - beware of race conditions!
+        :with => "tar_bz"                 # this is a "package helper" method that is passed some variables
+  this:
+  creates a temporary folder                                  # permissions
+  moves the contents of /var/us/feeds to the temporary folder # permissions
+  calls tar_bz on this folder which tar bzips the file and returns the filename
+  package sets the variable @package with the name of the packed file   
+
+
+===MediaWiki installation===
+set(:working_copy) do 
+  file = "/var/tmp/dump.sql"
+  mysqldump blar blar #{file}
+  file 
+end
+
+#role :backup,          "backup.cposandbox.com", "backup.morecowbell.com"
+set :servers,          "backup.cposandbox.com", "backup.morecowbell.com"
+
+set :backup_path,      "/var/backups/mediawiki"
+set :rotation_method,  :gfs # grandfather-father-son
+set :delivery_protocol :scp  # supported: mv, scp, ftp - ability to define your own? - yes, we'll define an lftp task
+set :delivery_user     "bob"
+
+
+create
+compress       # package  # by default calls "working_copy" and tar_bz's it
+encrypt
+deliver  # ?
+rotate
+
+# or simply - nothing, or one line or something
+# ---- wait, maybe just make all those earlier variables just methods? ---
+# we want it to be flexible, but if you want the defaults you can get off with doing almost nothing
+
+for this we need to have:
+* servers - where to go
+* server paths - where files should be archived
+* how it should be archived
+
+
+
+
+
+===svn repositories===
+
+##
+#  Package Helper Methods
+##
+
+def tar_bz
+  # blar blar
+end
+
+##
+#  Delivery Methods
+##
+
+def scp
+end
+
+def lftp
+end
+
+Notes:
+  specify what day of the week it starts on
+  hooks: before_packaging, after_packaging, before_delivery, after_delivery, before_rotation, after_rotation
+
+create a directory of that holds your recipes
+each recipe is a different thing to back up. 
+
+you can define a new method which can be used in your run time.
+
+so you have three things:
+1) variables
+2) methods 
+3) the script to run
+
+we'll also want a logger/log
+
+there are predefined, global and local of each of these.
+
+content
+compress      
+encrypt
+deliver
+rotate
+
+Lets talk about how we want each one of these to be used:
+
+==Content==
+variation: high. this will need to be written in almost every case
+unless content is 1. a folder, 2. the contents of a folder, 3. a file other
+options are 4) a series of shell commands, say to create a sql dump 5) any
+other legal shell stuff or ruby or whatever. totally flexibile.
+
+A few options to make these content statements:
+action :content, :is_folder => "/path/to/folder"             # content is the folder itself # is_folder is alias of is_file
+action :content, :is_contents_of => "/path/to/other/folder"  # content is folder/* , recursive(option?)
+action :content, :is_file   => "/path/to/file"               # content is a single file
+action :content, :is_file   => "/path/to/error_log", :recreate => true
+
+But what if the :content is a series of SQL statements? just pass "action" a block.
+action(:content) do |*args| # ? any args? # the output of before_content ?
+  sh "echo Hello world!"
+  sh "mysqldump -uroot database > /path/to/db.sql" 
+  "/path/to/db.sql" # make sure you return the full path to the folder/file you wish to be the content 
+end
+
+==Compress==
+variation: medium. as long as we create our own tar_gzip, tar_bz2, none. make sure that other people 
+can write their own.
+
+action :compress, :method => :tar_bz2  # actually calls a method named tar_bz2 with the input of the output of
+"content" ( or "after content?" ) 
+
+again, you can create your own
+
+action(:compress) do |content|
+  sh "tar #{content}" 
+  sh "bzip #{content}"
+  content + ".tar.bz"
+end
+
+==Encrypt==
+variation :medium-high. create gpg, none  leave the rest open
+action :encrypt, :method => :gpg # default, none
+
+action(:encrypt) do |compressed|
+  sh "gpg #{compressed}"
+  compressed + ".gpg"
+end
+
+==Deliver==
+variation :medium-high. first ftp and scp will be supported. like so:
+action :delivery, :method => :scp
+most of these settings will be set via the :set variables.
+just write the lftp stuff
+
+==Rotate==
+this is going to be the hardest part. firs figure out: 1) how are we going to implement gfs  
+over scp or ftp? becuase how do we know how to erase the old files?
+
+It looks like keeping a log may be the only way. Additionally, do we want to be
+able to specify custom rotation schedules?
+no i dont think its that useful
+how about:
+
+week-starts-on: mon
+father-on:      fri
+grandfather-on: the-last-fri # or 30th (any number)
+dont-backup-on: %q{sat sun}
+
+num-cycles-son: 14         # two weeks - 1d
+num-cycles-father: 4       # one month - 1w
+grandfathers-to-keep: 6    # 6 months
+
+day 0 is automatically promoted to grandfather
+
+then you have to keep a counter somehow as to what cycle you are on. 
+
+just use modular arthmatic. 
+specify start day offset
+what days to backup
+
+==Code==
+We need to define the relationship between the objects.
+
+Recipe
+Config
+
+variables that need set
+Actions
+
+A recipe is made up of actions
+a recipe has a config
+there is a CLI
+
+
+it loads up the recipe
+it loads in the config
+it sets up the actions
+it runs the actions and keeps state? an actor.
+
+Usage: backup.rb recipe [options]
+
+==Analyze Capistrano== 
+
+Backup::CLI.execute! 
+creates a new CLI instance which collects the recipes
+the execute_recipes method  
+* creates a new configuration object c
+* tells c.load the recipes we know of 
+* tells c.set the variables we set
+* creates actor a. a.send action with the actions that we have
+
+Lets investigate further
+* configuration object c creates a new actor with itself as the arg
+* the config object contains everything you think it should, stores set variables
+  stores actions, etc. note the special "require" method cap defines
+
+Thu Aug 31 07:20:27 PDT 2006
+We need to start formalizing our own take on this. In our situation the order is set.
+
+
+We run the following things:
+content
+compress
+encrypt
+deliver
+rotate
+
+What is actually happening here? We are defining these arbitrary methods. 
+we should also be able to arbitrarily define their order. 
+so the actor gets the execute order. 
+all the methods are defined (in the actor?) 
+the actor executes each of the methods (and the before_ and after_ methods)
+
+things to test- gloal vs. local options
+the flow 
+
+# Thu Aug 31 19:06:44 PDT 2006
+# We've just got the config actions to work. now what we need to do is work on
+# the actions that have no block associated with them. heres how:
+#
+# we want to have methods that are predfined but that also are defined like
+# anyone else would define them. so create a standard task to do certain
+# things. so the task tar_gz takes. so if #action is called without a block it
+# tries to call the action named ":method". so tar_gz would be called.
+#
+# we also may need to have extra config options. at least for our own tasks we
+# definately will. but maybe we should provide a way for the user to easily
+# create their own config options. oh wait, this is what #set does. all the
+# user has to do is define their own actions and just use #set if they want to
+# define their own variables.
