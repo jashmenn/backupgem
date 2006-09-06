@@ -8,18 +8,18 @@
 #------------------------------------------------------------------------------
 
 # Sepcify sever settings
-set :delivery_protocol, :scp  # supported: mv, scp, ftp and the ability to define your own
-set :action_order,      %w{ content compress encrypt deliver rotate }
+set :servers,           %w{ localhost }
+set :action_order,      %w{ content compress encrypt deliver rotate cleanup }
 
 # Name of the SSH user
-set :ssh_user,            ENV['USER']
+set :ssh_user,          ENV['USER']
 
 # Path to your SSH key
-set :identity_key,        ENV['HOME'] + "/.ssh/id_rsa"
+set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
 
 # Set global actions
-action :compress, :method => :tar_bz2   # could be set in global
-#action :delivery, :method => :scp       # could be set in global
+action :compress, :method => :tar_bz2 
+action :deliver,  :method => :mv    
 #action :encrypt,  :method => :gpg
 
 # Specify a directory that backup can use as a temporary directory
@@ -46,3 +46,32 @@ set :dont_backup_on,    %q{sat sun}
 set :son_promoted_on,      14   # two weeks 
 set :father_promoted_on,    4   # every two months (56 days)
 set :grandfathers_to_keep,  6   # 6 months
+
+
+# -------------------------
+# Standard Actions
+action(:tar_bz2) do
+  name = c[:tmp_dir] + "/" + File.basename(last_result) + ".tar.bz2"
+  puts "tar -cvjf #{name} #{last_result}"
+  name
+end
+
+action(:scp) do
+  # what should the default scp task be?
+  # scp the local file to the foreign directory. same name.
+  c[:servers].each do |server|
+    puts "scp #{last_result} #{server}:#{c[:backup_path]}/"
+  end
+  last_result
+end
+
+action(:mv) do
+  puts last_result
+  puts "mv #{last_result} #{c[:backup_path]}/"
+  # backup_path + "/" + last_result
+  c[:backup_path] + "/" + last_result
+end
+
+
+# TODO - make it so that the 'set' variables are available to these actions
+# without having to access the config array.

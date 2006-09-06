@@ -1,5 +1,7 @@
-module Backup
+require 'rake'
 
+module Backup
+  include FileUtils
   # An Actor is the entity that actually does the work of determining which
   # servers should be the target of a particular task, and of executing the
   # task on each of them in parallel. An Actor is never instantiated
@@ -8,6 +10,9 @@ module Backup
   class Actor
     # The configuration instance associated with this actor.
     attr_reader :configuration
+
+    # Alias for #configuration
+    alias_method :c, :configuration
 
     # A hash of the tasks known to this actor, keyed by name. The values are
     # instances of Actor::Action.
