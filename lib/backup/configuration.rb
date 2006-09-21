@@ -1,4 +1,6 @@
 require 'backup/actor'
+require 'backup/rotator'
+
 
 module Backup
   # Represents a specific Backup configuration. A Configuration instance
@@ -73,6 +75,8 @@ module Backup
       #  self[:original_value][variable] = @variables[variable]
       #  set variable, @variables[variable].call
       #end
+
+      # have it throw if it doesn exist
       @variables[variable]
     end
 

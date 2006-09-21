@@ -20,6 +20,7 @@ set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
 # Set global actions
 action :compress, :method => :tar_bz2 
 action :deliver,  :method => :mv    
+action :rotate,   :method => :via_mv
 #action :encrypt,  :method => :gpg
 
 # Specify a directory that backup can use as a temporary directory
@@ -31,11 +32,11 @@ set :tmp_dir, "/tmp"
 set :rotation_method,  :gfs
 
 # Rotation week starts on 
-set :week_starts_on,   :mon
+set :week_starts_on,   :tue
 
 # Promote Backups to the next level (son to father, father to grandfather) on
 # this day
-set :promote_on,       :fri
+set :promote_on,       :mon 
 set :dont_backup_on,    %q{sat sun}
 
 # These options specify how many days there are in the cycle for each of the
@@ -47,29 +48,33 @@ set :son_promoted_on,      14   # two weeks
 set :father_promoted_on,    4   # every two months (56 days)
 set :grandfathers_to_keep,  6   # 6 months
 
+# set :sons_to_keep 14
+# set :fathers_to_keep 6
+
 
 # -------------------------
 # Standard Actions
+# -------------------------
 action(:tar_bz2) do
   name = c[:tmp_dir] + "/" + File.basename(last_result) + ".tar.bz2"
-  puts "tar -cvjf #{name} #{last_result}"
+  sh "tar -cvjf #{name} #{last_result}"
   name
 end
 
 action(:scp) do
   # what should the default scp task be?
   # scp the local file to the foreign directory. same name.
+  # todo - specify a key
   c[:servers].each do |server|
-    puts "scp #{last_result} #{server}:#{c[:backup_path]}/"
+    sh "scp #{last_result} #{server}:#{c[:backup_path]}/"
   end
   last_result
 end
 
 action(:mv) do
-  puts last_result
-  puts "mv #{last_result} #{c[:backup_path]}/"
+  sh "mv #{last_result} #{c[:backup_path]}/"
   # backup_path + "/" + last_result
-  c[:backup_path] + "/" + last_result
+  c[:backup_path] + "/" + File.basename(last_result)
 end
 
 

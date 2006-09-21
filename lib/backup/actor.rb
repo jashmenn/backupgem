@@ -21,6 +21,8 @@ module Backup
     # A stack of the results of the actions called
     attr_reader :result_history
 
+    attr_reader :rotator
+
     class Action #:nodoc:
       attr_reader :name, :actor, :options
 
@@ -33,6 +35,7 @@ module Backup
       @configuration = config
       @action = {}
       @result_history = []
+      @rotator = Backup::Rotator.new(self)
     end
 
     # each action in the action_order is part of the chain. so you start by
@@ -68,6 +71,7 @@ module Backup
           if block_given?
             result = instance_eval( &block )
           elsif options[:method]
+            #result = self.send(options[:method], options[:args])
             result = self.send(options[:method])
           end
         end
@@ -79,6 +83,11 @@ module Backup
     def metaclass
       class << self; self; end
     end
+
+    # rotate Actions
+    def via_mv;  rotator.rotate_via_mv(last_result);   end
+    def via_ssh; rotator.rotate_via_ssh(last_result);  end
+    def via_ftp; rotator.rotate_via_ftp(last_result);  end
 
     private
       def define_method(name, &block)
