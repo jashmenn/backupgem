@@ -1,2 +1,2 @@
 #!/bin/bash
-./backup --recipe ../examples/mediawiki.rb
+./bin/backup --recipe examples/mediawiki.rb

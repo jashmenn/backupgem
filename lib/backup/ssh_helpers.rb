@@ -114,7 +114,23 @@ module Backup
     def on_remote(&block)
       connect
       self.instance_eval(&block)
+      close
+    end
+
+    def close
       @session.close
+    end
+
+    def verify_directory_exists(dir)
+      run "if [ -d '#{dir}' ]; then true; else mkdir -p '#{dir}'; fi"
+    end
+
+    def cleanup_directory(dir, keep)
+      puts "Cleaning up" 
+      cleanup = <<-END
+      LOOK_IN="#{dir}"; COUNT=`ls -1 $LOOK_IN | wc -l`; MAX=#{keep}; if (( $COUNT > $MAX )); then let "OFFSET=$COUNT-$MAX"; i=1; for f in `ls -1 $LOOK_IN | sort`; do if (( $i <= $OFFSET )); then CMD="rm $LOOK_IN/$f"; echo $CMD; $CMD; fi; let "i=$i + 1"; done; else true; fi
+      END
+      run cleanup # todo make it so that even this can be overridden
     end
 
    end # end class SshActor

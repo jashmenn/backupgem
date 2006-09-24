@@ -13,4 +13,5 @@ class Time
              :sat => 6}
     days[day]
   end
+
 end

@@ -18,9 +18,6 @@ module Backup
       # verify that each of the directories exist, grandfathers, fathers, sons
       hierarchy.each { |m| verify_local_backup_directory_exists(m) }
 
-      goes_in = today_goes_in
-      place_in = c[:backup_path] + "/" + goes_in  
-
       # place todays backup into the specified directory with a timestamp. 
       newname = timestamped_prefix(last_result)
       sh "mv #{last_result} #{place_in}/#{newname}"
@@ -29,25 +26,53 @@ module Backup
     end
     
     def rotate_via_ssh(last_result)
-      # copy the model supplied above. take everything out and make it a private method.
-      # al the stuff about what goes where today etc can all be methods. 
-      # test against yourself.
-      #
-      # this is the last part of this script. we're almost finished
+      ssh = Backup::SshActor.new(c) 
+      ssh.connect 
+      ssh.run "echo \"#{last_result}\""
+
+      hierarchy.each do |m| 
+        dir = c[:backup_path] + "/" + m
+        ssh.verify_directory_exists(dir) 
+      end  
+
+      newname = timestamped_prefix(last_result)
+      ssh.run "mv #{last_result} #{place_in}/#{newname}"
+
+      ssh.cleanup_directory(place_in, how_many_to_keep_today)
+      ssh.close
     end
 
+    # TODO
     def rotate_via_ftp(last_result)
+#      ftp = Backup::FtpActor.new(c) 
+#      ftp.connect 
+#
+#      hierarchy.each do |m| 
+#        dir = c[:backup_path] + "/" + m
+#        ftp.verify_directory_exists(dir) 
+#      end  
+#
+#      newname = timestamped_prefix(last_result)
+#      ftp.run "mv #{last_result} #{place_in}/#{newname}"
+#
+#      ftp.cleanup_directory(place_in, how_many_to_keep_today)
+#      ftp.close
     end
 
-    def promote_sons_today?
-      offset_days % c[:son_promoted_on] == 0 ? true : false
-    end
+    def create_sons_today?;     is_today_a? :son_created_on;     end
+    def promote_sons_today?;    is_today_a? :son_promoted_on;    end
+    def promote_fathers_today?; is_today_a? :father_promoted_on; end
 
-    def promote_fathers_today?
-      offset_days % (c[:son_promoted_on] * c[:father_promoted_on]) == 0 ? true : false
-    end
+    # old ( offset_days % c[:son_promoted_on] ) == 0 ? true : false
+    # old ( offset_days % (c[:son_promoted_on] * c[:father_promoted_on]) ) == 0 ? true : false
 
     private
+      def is_today_a?(symbol)
+        t = $test_time || Date.today
+        day = DateParser.date_from( c[symbol] )
+        day.include?( t )
+      end
+
       def verify_local_backup_directory_exists(dir)
         path = c[:backup_path]
         full = path + "/" + dir
@@ -56,12 +81,12 @@ module Backup
         end
       end
 
-      def offset_days
-        t = ENV['TEST_TIME'] || Time.now # todo, write a test to use this
-        num_from_day = Time.num_from_day( c[:promote_on] )
-        #t.days_since_epoch + num_from_day - 6 
-        t.days_since_epoch + num_from_day - 3  # TODO - test this. is this working the way we want?
-      end
+      #def offset_days
+      #  t = $test_time || Time.now # todo, write a test to use this
+      #  num_from_day = Time.num_from_day( c[:promote_on] )
+      #  offset = ( t.days_since_epoch + num_from_day + 0)
+      #  offset
+      #end
 
       def cleanup_via_mv(where, num_keep)
 
@@ -78,11 +103,19 @@ module Backup
         %w{grandfathers fathers sons}
       end
 
-      # figure out where today's backup should go
-      def today_goes_in
+      # figure out which generation today's backup is
+      public
+      def todays_generation
         goes_in = promote_fathers_today? ? "grandfathers" :         \
                   promote_sons_today?    ? "fathers"      : "sons"
       end
+
+      private
+      def place_in
+        goes_in = todays_generation
+        place_in = c[:backup_path] + "/" + goes_in
+      end
+ 
 
       # Given +name+ returns a timestamped version of name. 
       def timestamped_prefix(name)
@@ -112,7 +145,7 @@ module Backup
       # function returns the value of +sons_to_keep+. If today is a +father+
       # then +fathers_to_keep+ etc.
       def how_many_to_keep_today
-        goes_in = today_goes_in
+        goes_in = todays_generation
         keep = goes_in =~ /^sons$/         ? sons_to_keep     :
                goes_in =~ /^fathers$/      ? fathers_to_keep  :
                goes_in =~ /^grandfathers$/ ? gfathers_to_keep : 14

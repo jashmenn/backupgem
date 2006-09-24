@@ -19,8 +19,10 @@ set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
 
 # Set global actions
 action :compress, :method => :tar_bz2 
-action :deliver,  :method => :mv    
-action :rotate,   :method => :via_mv
+#action :deliver,  :method => :mv    
+action :deliver,  :method => :scp    
+#action :rotate,   :method => :via_mv
+action :rotate,   :method => :via_ssh
 #action :encrypt,  :method => :gpg
 
 # Specify a directory that backup can use as a temporary directory
@@ -31,25 +33,31 @@ set :tmp_dir, "/tmp"
 # Read more about that below
 set :rotation_method,  :gfs
 
-# Rotation week starts on 
-set :week_starts_on,   :tue
-
-# Promote Backups to the next level (son to father, father to grandfather) on
-# this day
-set :promote_on,       :mon 
-set :dont_backup_on,    %q{sat sun}
-
 # These options specify how many days there are in the cycle for each of the
 # tiers.  Under these settings we will keep daily backups (sons) for two weeks.
 # Then at the end of the two weeks (on day 14) we will promote the son to
 # 'father'. On the 4th father that is created (on day 56 [= 14*4]) we will
 # promote to grandfather. We keep 6 old grandfathers.
-set :son_promoted_on,      14   # two weeks 
-set :father_promoted_on,    4   # every two months (56 days)
-set :grandfathers_to_keep,  6   # 6 months
 
-# set :sons_to_keep 14
-# set :fathers_to_keep 6
+
+# :mon-sun
+# :last_day_of_the_month # whatever son_promoted on son was, but the last of the month
+# everything else you can define with a Runt object
+# set :son_created_on,     :every_day - if you dont want a son created dont run the program
+# a backup is created every time the program is run
+
+set :son_promoted_on,    :fri
+set :father_promoted_on, :last_fri_of_the_month
+
+# more complex
+# mon_wed_fri = Runt::DIWeek.new(Runt::Mon) | 
+#               Runt::DIWeek.new(Runt::Wed) | 
+#               Runt::DIWeek.new(Runt::Fri)
+# set :son_promoted_on, mon_wed_fri
+
+set :sons_to_keep,         14
+set :fathers_to_keep,       6
+set :grandfathers_to_keep,  6   # 6 months
 
 
 # -------------------------
@@ -66,9 +74,10 @@ action(:scp) do
   # scp the local file to the foreign directory. same name.
   # todo - specify a key
   c[:servers].each do |server|
-    sh "scp #{last_result} #{server}:#{c[:backup_path]}/"
+    host = server =~ /localhost/ ? "" : "#{server}:"
+    sh "scp #{last_result} #{host}#{c[:backup_path]}/"
   end
-  last_result
+  c[:backup_path] + "/" + File.basename(last_result)  
 end
 
 action(:mv) do
