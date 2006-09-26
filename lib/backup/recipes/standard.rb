@@ -19,10 +19,10 @@ set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
 
 # Set global actions
 action :compress, :method => :tar_bz2 
-#action :deliver,  :method => :mv    
-action :deliver,  :method => :scp    
-#action :rotate,   :method => :via_mv
-action :rotate,   :method => :via_ssh
+action :deliver,  :method => :mv    
+#action :deliver,  :method => :scp    
+action :rotate,   :method => :via_mv
+#action :rotate,   :method => :via_ssh
 #action :encrypt,  :method => :gpg
 
 # Specify a directory that backup can use as a temporary directory
@@ -32,13 +32,6 @@ set :tmp_dir, "/tmp"
 # Rotation method. Currently the only method is gfs, grandfather-father-son. 
 # Read more about that below
 set :rotation_method,  :gfs
-
-# These options specify how many days there are in the cycle for each of the
-# tiers.  Under these settings we will keep daily backups (sons) for two weeks.
-# Then at the end of the two weeks (on day 14) we will promote the son to
-# 'father'. On the 4th father that is created (on day 56 [= 14*4]) we will
-# promote to grandfather. We keep 6 old grandfathers.
-
 
 # :mon-sun
 # :last_day_of_the_month # whatever son_promoted on son was, but the last of the month

@@ -1,8 +1,9 @@
-Thu Aug 17 19:44:40 PDT 2006
+===What is Backup?===
+Backup+ is the easiest and most flexible backup, archive and rotate
+tool.  It's a beginning-to-end solution for scheduled backups in a clean ruby
+package that is simple use and powerful when customized.
 
-Backup gem is the easiest and most flexible backup, archive and rotate
-tool. Inspired by Capistrano, a simple configuration will allow 
-anyone to specify:
+Backup allows you to specify each of the following options:
 * what is being archived (files, folders, arbitrary scripts)  
 * how it's being archived (tar gzip, bz2)
 * where the archive is going (multiple backup servers? easy)           
@@ -11,48 +12,315 @@ anyone to specify:
 * how it's going to be rotated when it gets there (grandfather-father-son, etc)
 * how often will this process happen (customizable cycles)
 * what happens to the working copy after the process (recreate files, folders etc. restart daemons)
-It's a beginning to end solution for scheduled backups in a clean ruby package.
 
-So that we can all speak the same language some terms are listed below:
-
-Glossary: 
-  Bundle:            Generic word for a collection of files being joined into
-                     one file. example: tar 
-  Compression:       Taking a file or Bundle and making it smaller. example:
-                     gzip, bz2
-  Working Copy:      The most up-to-date, or 'current' collection of
-                     uncompressed data to be stored.  
-  Package:           A Bundled and/or Compressed Working Copy 
-  Client:            Where the Working Copy is stored and, probably, where the
-                     Package is created 
-  Backup Server:     Where all Packages will be stored. Also known as simply
-                     "the Server".
-  Delivery Protocol: How the Package gets to the Server. Example: scp (via
-                     ssh), ftp
-
-*rotate* is a collection of scripts that is complete enough to save you
+Backup is a collection of scripts that is complete enough to save you
 time, but flexible enough to work with any situation.
 
-*rotate* uses a Grandfather-Father-Son rotation scheme that can be customized
-to the specific purposes.
-
-
-Assumptions:
-* the path, name, and password are the same for all servers
+===Getting Backup===
+====Prerequisites====   
+Backup makes the following assumptions about your machines:
 * server and client understand POSIX commmands
+* passwords and paths are the same on each server
 
-==Use Cases==
-===XML feed logs===
+Backup depends on the following libraries:
+* [[Runt]] for describing [[temporal ranges]]
+* [[Net::SSH]] for SSH backups
+* [[Net::FTP]] for FTP backups
 
-There is a group of files in /var/us/feeds
-create a new directory
-move the files into the new directory
-tar bz2 it
-move it to the external harddisk
-After 30 days, delete the last one.
+These are listed as dependencies in the gem file so you should be prompted to
+install them when you install Backup.
 
-package :contents_of => "/var/us/feeds",  # package :folder => "/foo/folder" - beware of race conditions!
-        :with => "tar_bz"                 # this is a "package helper" method that is passed some variables
+====Using RubyGems====
+If you have [[http://rubygems.rubyforge.org RubyGems]] installed, installing
+Backup is simple:
+
+  sudo gem install backupgem
+
+====Using svn====
+If you prefer, you can checkout backupgem from the [[RubyForge Repository]].
+Feel free to browse the releases or trunk [[here]].
+
+  svn+ssh://blar blar blar
+
+===License Information===
+Backup is made available under either the BSD license, or the same license Ruby
+(which, by extension, also allows the GPL as a permissable license as well).
+You can view the full text of any of these licenses in the +doc+ subdirectory
+of the Backup distrubtion. The texts of the BSD and GPL licenses are also
+available online: "BSD":http://www.opensource.org/licenses/bsd-license.php and
+"GPL":http://www.opensource.org/licenses/gpl-license.php.
+
+If you desire permission to use either Backup in a manner incompatible with
+these licenses, please contact the copyright holder
+([[mailto:nate@natemurray.com Nate Murray]] in order to negotiate a more
+compatible license.
+
+===Support===
+Mailing lists, bug trackers, feature requests, and public forums are all
+available courtesty of [[http://rubyforge.org RubyForge]] at the 
+[[http://rubyforge.org/projects/backupgem BackupGem project page]].
+
+====Mailing Lists====
+{|class="wikitable"
+! List Name
+!
+! Desc.
+|---
+| [[http://rubyforge.org/pipermail/backupgem-users backupgem-users]]
+| [[http://rubyforge.org/mailman/listinfo/backupgem-users subscribe / unsubscribe]]
+| The BackupGem users list is devoted to the discussion of and questions about the usage of Backup. If you can't quite figure out how to get a feature of Backup to work, this is the list you would go to in order to ask your questions. 
+|---
+| [[http://rubyforge.org/pipermail/backupgem-devel backupgem-devel]]
+| [[http://rubyforge.org/mailman/listinfo/backupgem-devel subscribe / unsubscribe]]
+| The Backup developers list is devoted to the discussion of Backup's implementation. If you have created a patch that you would like to discuss, or if you would like to discuss a new feature, this is the list for you.
+|}
+
+===About the Author===
+Backup was written by [[mailto:nate@natemurray.com Nate Murray]. Feel free to
+send him compliments, candy, money, praise, or new feature patches--he likes
+all those things. You can send him questions and suggestions, too, if you
+really want to. However, for bug reports and general feature requests,
+please use the trackers on the [[http://rubyforge.org/projects/backupgem BackupGem project page]].
+
+===Special Thanks===
+* Jamis Buck for writing [http://weblog.rubyonrails.com/2006/8/30/capistrano-1-1-9-beta Capistrano]. Capistrano provided the inspiration and some code for this work. Additionally, the Net::SSH manual provided the inspiration for this manual. Thanks for the top-notch work Jamis!
+
+* The date parser guy
+
+==How Backup Works==
+===Intro===
+A basic backup has the following sequence:
+* content 
+* compress 
+* encrypt 
+* deliver 
+* rotate 
+* cleanup
+
+This order is the default, however, like most things it is customizable. 
+Think of it like a pipline: the input of each step is the output of the last
+step.
+
+Each of these things are specified in a +recipe+ file which is describe below. 
+
+===CLI===
+
+  Usage: ./backup [options] 
+  Recipe Options -----------------------
+      -r, --recipe RECIPE              A recipe file to load. Multiple recipes
+                                       may be specified, and are loaded in the 
+                                       given order.
+      -g, --global FILE                Specify the global recipe file to work
+                                       with. Defaults to the file +global.rb+ 
+                                       in the directory of +recipe+ 
+      -s, --set NAME=VALUE             Specify a variable and it's value to 
+                                       set. This will be set after loading all
+                                       recipe files.
+
+==Backup Recipe File Format==
+===Introduction===
+* The Backup Recipe format is pure ruby code. Anything that is valid ruby is valid in the recipe file. There are a number of shortcuts that will make your life easier.
+
+* Each of the steps are specified as an +action+. (An action is really nothing more than a method that becomes defined in the Actor instance. See API docs if you're interestd.)
+
+* You may create "hook" actions for any of the actions. So if you define a method +before_content+ it will be called just before +content+ is called. A method named +after_rotation+ would be called after rotation. This may not always be needed as you can customize the rotation order to be whatever you want. See [[#XXX]] below. 
+
+* Each action has the variable +last_result+ available to it. This is the return value of the method that was called previously. Note that this includes the output of the "hook" methods. 
+
+* All configuration variables are available to actions via the hash c[]. For example, the backup path is available to your actions as c[:backup_path].
+
+===Variables===
+Intro on how to set variables. How this works.
+
+Required variables for all configurations.
+{|class="wikitable"
+! Name
+! Desc.
+! Example
+|---
+| :action_order
+| short desc. TODO 
+| set :action_order,      %w{ content compress encrypt deliver rotate cleanup }
+|---
+| :tmp_dir
+| Specify a directory that backup can use as a temporary directory. Default <tt>/tmp</tt>.
+| set :tmp_dir, File.dirname(__FILE__) + "/../tmp"
+|---
+| :backup_path
+| The path to backup on. TODO - if its local the local server if its foreign the foreign server
+| set :backup_path, "/var/local/backups/mediawiki"
+|}
+
+===Content===
+The first step in any backup is the content that is to be backed up. Backup
+provides a couple of shortcuts for common ways to locate content and allows you
+to arbitrarily define your own.
+
+Some typical types of content are:
+* a particular file
+* a particular folder
+* the contents of a particular folder 
+
+These could be specified like so:
+
+  action :content, :is_file   => "/path/to/file"               # content is a single file
+  action :content, :is_file   => "/path/to/error_log", :recreate => true
+  action :content, :is_folder => "/path/to/folder"             # content is the folder itself 
+  action :content, :is_contents_of => "/path/to/other/folder"  # content is folder/* , recursive option
+
+If you want :content to be a series of shell commands just pass "action" a block:
+
+  action(:content) do 
+    sh "echo \"hello $HOSTNAME\""
+    sh "mysqldump -uroot database > /path/to/db.sql" 
+    "/path/to/db.sql" # make sure you return the full path to the folder/file you wish to be the content 
+  end
+
+===Compress===
+Next you may want to compress your content. Again, there are a few one-liners for common cases and you can create your own.
+
+  action :compress, :method => :tar_bz2  # actually calls a method named tar_bz2 with output of ":content" ( or ":after_content" ) 
+  # or
+  action :compress, :method => :tar_gzip 
+
+Again, you can create your own.
+
+  action(:compress) 
+    sh "my_tar  #{last_result} #{last_result}.tar" 
+    sh "my_bzip #{last_result}.tar #{last_result}.tar.bz2"
+    last_result + ".tar.bz2"
+  end
+
+===Encrypt===
+If you wish to use encryption this is available to you. I would recommend that
+you think seriously about how you wish to manage your keys for this backup
+process. If you are backing up encrypted data then you need to backup your keys
+or else you risk losing access to your data. Secure key management is beyond
+the scope of this document, but I recommend the following links:
+* link 1
+* link 2
+
+  action :encrypt, :method => :gpg # default, none
+
+or your own:
+
+  action(:encrypt) 
+    sh "gpg #{last_result}"
+    last_result + ".gpg"
+  end
+
+===Delivery===
+====Action====
+Delivery is supported via <tt>scp</tt>, <tt>ftp</tt>, and <tt>mv</tt>
+
+  action :delivery, :method => :scp
+  action :delivery, :method => :ftp
+  action :delivery, :method => :mv
+
+The <tt>:mv</tt> action is defined like any user-defined action:
+
+  action(:mv) do
+    sh "mv #{last_result} #{c[:backup_path]}/"
+    c[:backup_path] + "/" + File.basename(last_result)
+  end
+
+====Variables====
+{|class="wikitable"
+! Name
+! Desc.
+! Example
+|---
+| :servers
+| An array of host names to deliver the data to. TODO this currently only supports 1 server. 
+| set :servers,           %w{ localhost }
+|---
+| :ssh_user
+| The name of the ssh user on the foreign server. Default ENV['USER'].
+| set :ssh_user,          ENV['USER']
+|---
+| :identity_key
+| The path to the key to use when ssh'ing into a foreign server.
+| set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
+|}
+
+==Rotate==
+Rotation of your backups is a way to keep snapshot copies of your backups in time while not keeping every single backup for every single day.
+Currently the only form of rotation Backup supports is [[grandfather-father-son]] See Appendix A if you are unfamiliar with how this works. 
+
+  set :rotation_method,  :gfs # this is the default. you don't need to set it, but this is how you could
+
+By deafult, a +son+ is created daily, unless it is a day to create a father or
+grandfather.  It is assumed that every time you run Backup you want to create a
+backup. Therefore, if you do not want to a son etc, do not run the program. 
+You can specify when the son is promoted to a father by the following variable.
+
+  set :son_promoted_on,    :fri
+
+You specify when fathers are promoted to grandfathers by something like the following
+
+  set :father_promoted_on, :last_fri_of_the_month
+
+Valid argumetns for specifying these promotions are as follows:
+* :mon-:sun - A symbol of the abbreviation of any day of the week
+* :last_*_of_the_month - A symbol, replacing the * with the abbreviation for the day of the weeks. Such as :last_fri_of_the_month.
+* Any valid Runt object. 
+
+Representing these [[temporal ranges]] is done internally by using Runt. You are, therefore, allowed to pass in your own arbitrarily complex runt object.
+Say for instance that I wanted to promote to fathers on monday, wednesday and friday. I could do something like the following:
+
+  mon_wed_fri = Runt::DIWeek.new(Runt::Mon) | 
+                Runt::DIWeek.new(Runt::Wed) | 
+                Runt::DIWeek.new(Runt::Fri)
+  set :son_promoted_on, mon_wed_fri
+
+See the [[Runt documentation]] for more information on this.
+
+==Examples==
+
+Here we will cover three examples. 
+# a super-simple backup to a local directory, show how easy it is
+# a more complex implementation, show the variables you can set show the customizability and use of foreign server
+# every more complex. define your own method, use a global file to share in the configuration.
+
+===Example One: SQL Backup===
+Our first example will be backing up a MediaWiki installation. Say we have a MySQL database named
+'mediawiki'. What we want is to:
+* create a dump of the database every day
+* compress this backup and store it in a local folder
+* store 2 weeks of daily backups (son)
+* store a weekly backup (father) going back 6 weeks
+* and create a monthly backup on the last friday of every month (grandfather) for 6 months
+
+Thankfully, this is incredibly simple:
+
+  set :backup_path, "/var/local/backups/mediawiki"
+  set :tmp_dir, "/tmp"
+
+  action(:content) do
+    dump = c[:tmp_dir] + "/mediawiki.sql"
+    sh "mysqldump -uroot mediawiki > #{dump}"
+    dump # make sure you return the name of the file
+  end
+
+''In this case, make sure that +:backup_path+ and +:tmp_dir+ are writable by the user
+that is running the backup script.''
+
+Note a few things here.
+# Each time we +set+ a variable that becomes available to the actions as +c[:var]+
+# 
+
+
+===Example Two: Folder of Logs===
+
+  There is a group of files in /var/us/feeds
+  create a new directory
+  move the files into the new directory
+  tar bz2 it
+  move it to the external harddisk
+  After 30 days, delete the last one.
+
+  package :contents_of => "/var/us/feeds",  # package :folder => "/foo/folder" - beware of race conditions!
+          :with => "tar_bz"                 # this is a "package helper" method that is passed some variables
   this:
   creates a temporary folder                                  # permissions
   moves the contents of /var/us/feeds to the temporary folder # permissions
@@ -60,234 +328,12 @@ package :contents_of => "/var/us/feeds",  # package :folder => "/foo/folder" - b
   package sets the variable @package with the name of the packed file   
 
 
-===MediaWiki installation===
-set(:working_copy) do 
-  file = "/var/tmp/dump.sql"
-  mysqldump blar blar #{file}
-  file 
-end
+==TODO==
+what is left to program:
+* create the file tasks
+* get gpg to work - which means install it on your mac
 
-#role :backup,          "backup.cposandbox.com", "backup.morecowbell.com"
-set :servers,          "backup.cposandbox.com", "backup.morecowbell.com"
-
-set :backup_path,      "/var/backups/mediawiki"
-set :rotation_method,  :gfs # grandfather-father-son
-set :delivery_protocol :scp  # supported: mv, scp, ftp - ability to define your own? - yes, we'll define an lftp task
-set :delivery_user     "bob"
-
-
-create
-compress       # package  # by default calls "working_copy" and tar_bz's it
-encrypt
-deliver  # ?
-rotate
-
-# or simply - nothing, or one line or something
-# ---- wait, maybe just make all those earlier variables just methods? ---
-# we want it to be flexible, but if you want the defaults you can get off with doing almost nothing
-
-for this we need to have:
-* servers - where to go
-* server paths - where files should be archived
-* how it should be archived
-
-
-
-
-
-===svn repositories===
-
-##
-#  Package Helper Methods
-##
-
-def tar_bz
-  # blar blar
-end
-
-##
-#  Delivery Methods
-##
-
-def scp
-end
-
-def lftp
-end
-
-Notes:
-  specify what day of the week it starts on
-  hooks: before_packaging, after_packaging, before_delivery, after_delivery, before_rotation, after_rotation
-
-create a directory of that holds your recipes
-each recipe is a different thing to back up. 
-
-you can define a new method which can be used in your run time.
-
-so you have three things:
-1) variables
-2) methods 
-3) the script to run
-
-we'll also want a logger/log
-
-there are predefined, global and local of each of these.
-
-content
-compress      
-encrypt
-deliver
-rotate
-
-Lets talk about how we want each one of these to be used:
-
-==Content==
-variation: high. this will need to be written in almost every case
-unless content is 1. a folder, 2. the contents of a folder, 3. a file other
-options are 4) a series of shell commands, say to create a sql dump 5) any
-other legal shell stuff or ruby or whatever. totally flexibile.
-
-A few options to make these content statements:
-action :content, :is_folder => "/path/to/folder"             # content is the folder itself # is_folder is alias of is_file
-action :content, :is_contents_of => "/path/to/other/folder"  # content is folder/* , recursive(option?)
-action :content, :is_file   => "/path/to/file"               # content is a single file
-action :content, :is_file   => "/path/to/error_log", :recreate => true
-
-But what if the :content is a series of SQL statements? just pass "action" a block.
-action(:content) do |*args| # ? any args? # the output of before_content ?
-  sh "echo Hello world!"
-  sh "mysqldump -uroot database > /path/to/db.sql" 
-  "/path/to/db.sql" # make sure you return the full path to the folder/file you wish to be the content 
-end
-
-==Compress==
-variation: medium. as long as we create our own tar_gzip, tar_bz2, none. make sure that other people 
-can write their own.
-
-action :compress, :method => :tar_bz2  # actually calls a method named tar_bz2 with the input of the output of
-"content" ( or "after content?" ) 
-
-again, you can create your own
-
-action(:compress) do |content|
-  sh "tar #{content}" 
-  sh "bzip #{content}"
-  content + ".tar.bz"
-end
-
-==Encrypt==
-variation :medium-high. create gpg, none  leave the rest open
-action :encrypt, :method => :gpg # default, none
-
-action(:encrypt) do |compressed|
-  sh "gpg #{compressed}"
-  compressed + ".gpg"
-end
-
-==Deliver==
-variation :medium-high. first ftp and scp will be supported. like so:
-action :delivery, :method => :scp
-most of these settings will be set via the :set variables.
-just write the lftp stuff
-
-==Rotate==
-this is going to be the hardest part. firs figure out: 1) how are we going to implement gfs  
-over scp or ftp? becuase how do we know how to erase the old files?
-
-It looks like keeping a log may be the only way. Additionally, do we want to be
-able to specify custom rotation schedules?
-no i dont think its that useful
-how about:
-
-week-starts-on: mon
-father-on:      fri
-grandfather-on: the-last-fri # or 30th (any number)
-dont-backup-on: %q{sat sun}
-
-num-cycles-son: 14         # two weeks - 1d
-num-cycles-father: 4       # one month - 1w
-grandfathers-to-keep: 6    # 6 months
-
-day 0 is automatically promoted to grandfather
-
-then you have to keep a counter somehow as to what cycle you are on. 
-
-just use modular arthmatic. 
-specify start day offset
-what days to backup
-
-==Code==
-We need to define the relationship between the objects.
-
-Recipe
-Config
-
-variables that need set
-Actions
-
-A recipe is made up of actions
-a recipe has a config
-there is a CLI
-
-
-it loads up the recipe
-it loads in the config
-it sets up the actions
-it runs the actions and keeps state? an actor.
-
-Usage: backup.rb recipe [options]
-
-==Analyze Capistrano== 
-
-Backup::CLI.execute! 
-creates a new CLI instance which collects the recipes
-the execute_recipes method  
-* creates a new configuration object c
-* tells c.load the recipes we know of 
-* tells c.set the variables we set
-* creates actor a. a.send action with the actions that we have
-
-Lets investigate further
-* configuration object c creates a new actor with itself as the arg
-* the config object contains everything you think it should, stores set variables
-  stores actions, etc. note the special "require" method cap defines
-
-Thu Aug 31 07:20:27 PDT 2006
-We need to start formalizing our own take on this. In our situation the order is set.
-
-
-We run the following things:
-content
-compress
-encrypt
-deliver
-rotate
-
-What is actually happening here? We are defining these arbitrary methods. 
-we should also be able to arbitrarily define their order. 
-so the actor gets the execute order. 
-all the methods are defined (in the actor?) 
-the actor executes each of the methods (and the before_ and after_ methods)
-
-things to test- gloal vs. local options
-the flow 
-
-# Thu Aug 31 19:06:44 PDT 2006
-# We've just got the config actions to work. now what we need to do is work on
-# the actions that have no block associated with them. heres how:
-#
-# we want to have methods that are predfined but that also are defined like
-# anyone else would define them. so create a standard task to do certain
-# things. so the task tar_gz takes. so if #action is called without a block it
-# tries to call the action named ":method". so tar_gz would be called.
-#
-# we also may need to have extra config options. at least for our own tasks we
-# definately will. but maybe we should provide a way for the user to easily
-# create their own config options. oh wait, this is what #set does. all the
-# user has to do is define their own actions and just use #set if they want to
-# define their own variables.
-
-
-
-Tue Sep  5 07:20:32 PDT 2006
-
+what is left to do:
+* work on the styles
+* figure out the shorthand for monospace in media wiki
+* get syntax highlighting to work

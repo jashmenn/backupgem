@@ -20,7 +20,8 @@ module Backup
     def initialize(args = ARGV)
       @args = args
       @options = { :recipes => [], :actions  => [], 
-                      :vars => {}, :pre_vars => {} }
+                      :vars => {}, # :pre_vars => {}, 
+                    :global => nil  }
 
       OptionParser.new do |opts|
         opts.banner = "Usage: #{$0} [options] [args]"
@@ -28,11 +29,6 @@ module Backup
         opts.separator ""
         opts.separator "Recipe Options -----------------------"
         opts.separator ""
-
-        #opts.on("-a", "--action ACTION",
-        #  "An action to execute. Multiple actions may",
-        #  "be specified, and are loaded in the given order."
-        #) { |value| @options[:actions] << value }
 
         opts.on("-r", "--recipe RECIPE",
           "A recipe file to load. Multiple recipes may",
@@ -47,13 +43,11 @@ module Backup
           @options[:vars][name.to_sym] = value
         end
 
-        opts.on("-S", "--set-before NAME=VALUE",
-          "Specify a variable and it's value to set. This",
-          "will be set BEFORE loading all recipe files."
-        ) do |pair|
-          name, value = pair.split(/=/, 2)
-          @options[:pre_vars][name.to_sym] = value
-        end
+        opts.on("-g", "--global RECIPE",
+          "Specify a specific file to load as the global file",
+          "for the recipes. By default the recipes load the",
+          "file +global.rb+ in the same directory." 
+        ) { |value| @options[:recipes] << value }
 
         if args.empty?
           puts opts
@@ -88,16 +82,17 @@ module Backup
       def execute_recipes!
         config = Backup::Configuration.new
         #config.logger.level = options[:verbose]
-        options[:pre_vars].each { |name, value| config.set(name, value) }
+        #options[:pre_vars].each { |name, value| config.set(name, value) }
+        options[:vars].each { |name, value| config.set(name, value) }
 
         # load the standard recipe definition
         config.load "standard"
         options[:recipes].each do |recipe| 
-          global = File.dirname(recipe) + "/global.rb"
+          global = options[:global] || File.dirname(recipe) + "/global.rb"
           config.load global if File.exists? global    # cache this?
         end
         options[:recipes].each { |recipe| config.load(recipe) }
-        options[:vars].each { |name, value| config.set(name, value) }
+        #options[:vars].each { |name, value| config.set(name, value) }
 
         actor = config.actor
         actor.start_process! # eventually make more options, like the ability

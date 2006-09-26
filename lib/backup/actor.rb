@@ -73,6 +73,9 @@ module Backup
           elsif options[:method]
             #result = self.send(options[:method], options[:args])
             result = self.send(options[:method])
+            # here we need to have a thing where we can send the arguments
+            # define the method 'content' so that would take the other options
+            # if there are options (any hash) just send along that hash. this needs more work
           end
         end
         result
