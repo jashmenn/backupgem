@@ -157,7 +157,7 @@ module Backup
     # the options under the <tt>:desc</tt> key. This method ultimately
     # delegates to Actor#define_task.
     def action(name, options={}, &block)
-      raise ArgumentError, "expected a block or method" unless block or options[:method] 
+      # raise ArgumentError, "expected a block or method" unless block or options[:method]  # ?? 
       if @next_description
         options = options.merge(:desc => @next_description)
         @next_description = nil

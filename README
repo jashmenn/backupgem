@@ -76,16 +76,19 @@ available courtesty of [[http://rubyforge.org RubyForge]] at the
 |}
 
 ===About the Author===
-Backup was written by [[mailto:nate@natemurray.com Nate Murray]. Feel free to
-send him compliments, candy, money, praise, or new feature patches--he likes
+Backup was written by [[mailto:nate@natemurray.com Nate Murray]. 
+Nate currently works at an internet retailer in Southern California.
+Feel free to send him compliments, candy, money, praise, or new feature patches--he likes
 all those things. You can send him questions and suggestions, too, if you
 really want to. However, for bug reports and general feature requests,
 please use the trackers on the [[http://rubyforge.org/projects/backupgem BackupGem project page]].
 
 ===Special Thanks===
+* Matt Pulver for help with various technical problems and ideas.
+
 * Jamis Buck for writing [http://weblog.rubyonrails.com/2006/8/30/capistrano-1-1-9-beta Capistrano]. Capistrano provided the inspiration and some code for this work. Additionally, the Net::SSH manual provided the inspiration for this manual. Thanks for the top-notch work Jamis!
 
-* The date parser guy
+* [[mailto:info@digitalclash.com Matthew Lipper]] for writing the Runt Ruby Temporal Expressions Library
 
 ==How Backup Works==
 ===Intro===
@@ -332,8 +335,14 @@ Note a few things here.
 what is left to program:
 * create the file tasks
 * get gpg to work - which means install it on your mac
+* add in better logging 
+* clean up the tests
+* give tar an option so that it knows it is a directory
 
 what is left to do:
 * work on the styles
 * figure out the shorthand for monospace in media wiki
-* get syntax highlighting to work
+* setup the mailing lists
+* cleanup the code borrowed from capistrano
+* lookup rdoc syntax highlighting
+
