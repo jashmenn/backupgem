@@ -66,18 +66,19 @@ module Backup
       @action[name] = (options[:action_class] || Action).new(name, self, options)
 
       if self.respond_to?(name) && !block_given? 
-        puts "i respond to and no block was given"
         # if it was already defined and we aren't trying to re-define it then
         # what we are trying to do is define it the same way it is defined now
         # only with options being sent to it. 
-        #metaclass.send(:alias_method, "old_#{name}".intern, name)
-        self.class.send(:alias_method, "old_#{name}".intern, name)
-        define_method("#{name.to_s}_new".intern) do
-          puts "im in the content_new"
+        metaclass.send(:alias_method, "old_#{name}".intern, name)
+        #self.class.send(:alias_method, "old_#{name}".intern, name)
+        #define_method("#{name.to_s}_new".intern) do
+        define_method(name) do
           begin
-            self.send("old_#{name}", options)
+           result =  self.send("old_#{name}", options)
           end
+          result
         end
+        return
       end
 
       define_method(name) do
@@ -115,6 +116,17 @@ module Backup
     # +:is_file+ and +:is_folder+ are basically the same thing in that they
     # backup the whole file/folder whereas +:is_contents_of+ backs up the
     # <em>contents</em> of the given folder.
+    #
+    # Note that +:is_contents_of+ performs a very spcific action: 
+    # * a temporary directory is created
+    # * all of the files are moved (including subdirectories) into the temporary directory
+    # * the archive is created from the temporary directory
+    # 
+    # TODO how should this be cleaned up?. How about everything in the results
+    # directory also has an option as to if it is cleaned up at the end or not?
+    # AH, cleanup could be given the names of keys and the values are the files/folders to be rm'd
+    #
+    # If this is not your desired behavior then you must write your own. 
     # 
     # These options only work for local files. If you are getting the files
     # from a foreign server you will have to write a custom +:content+ method.
@@ -122,19 +134,24 @@ module Backup
     #   action :content, :is_file        => "/path/to/file"          # content is a single file
     #   action :content, :is_folder      => "/path/to/folder"        # content is the folder itself
     #   action :content, :is_contents_of => "/path/to/other/folder"  # files in folder/
+    #
+    # TODO, where we're at. we are trying to get this to be redefined and to
+    # have ioptions sent to us by aliasing th emethod and having the new
+    # mthod clal us with options. seems easy enough. somehow this isnt
+    # getting called as seen by the test and the fact that tar_bz2 is
+    # complaining of no input. your mission, should you choose to accept it,
+    # is to track down where this system is breaking down.  
     def content(opts={})
-      # TODO, where we're at. we are trying to get this to be redefined and to
-      # have ioptions sent to us by aliasing th emethod and having the new
-      # mthod clal us with options. seems easy enough. somehow this isnt
-      # getting called as seen by the test and the fact that tar_bz2 is
-      # complaining of no input. your mission, should you choose to accept it,
-      # is to track down where this system is breaking down.  
-      puts "Im in :old_content"
       return opts[:is_file]        if opts[:is_file] 
       return opts[:is_folder]      if opts[:is_folder]
       if opts[:is_contents_of]
-        # make a tmpdir
-        # mv the files form 
+        orig   = opts[:is_contents_of]
+        tmpdir = c[:tmp_dir] + "/tmp_" + Time.now.strftime("%Y%m%d%H%M%S") +"_#{rand}"
+        new_orig = tmpdir + "/" + File.basename(orig)
+        sh "mkdir #{tmpdir}"
+        sh "mkdir #{new_orig}"
+        sh "mv #{orig}/* #{new_orig}/"
+        return new_orig
       end
       raise "Unknown option in :content. Try :is_file, :is_folder " +
             "or :is_contents_of"

@@ -333,11 +333,10 @@ Note a few things here.
 
 ==TODO==
 what is left to program:
-* create the file tasks
 * get gpg to work - which means install it on your mac
 * add in better logging 
 * clean up the tests
-* give tar an option so that it knows it is a directory
+* work on the cleanup options 
 
 what is left to do:
 * work on the styles
