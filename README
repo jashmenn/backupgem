@@ -1,5 +1,5 @@
 ===What is Backup?===
-Backup+ is the easiest and most flexible backup, archive and rotate
+<tt>Backup</tt> is the easiest and most flexible backup, archive and rotate
 tool.  It's a beginning-to-end solution for scheduled backups in a clean ruby
 package that is simple use and powerful when customized.
 
@@ -45,7 +45,7 @@ Feel free to browse the releases or trunk [[here]].
 ===License Information===
 Backup is made available under either the BSD license, or the same license Ruby
 (which, by extension, also allows the GPL as a permissable license as well).
-You can view the full text of any of these licenses in the +doc+ subdirectory
+You can view the full text of any of these licenses in the <tt>doc</tt> subdirectory
 of the Backup distrubtion. The texts of the BSD and GPL licenses are also
 available online: "BSD":http://www.opensource.org/licenses/bsd-license.php and
 "GPL":http://www.opensource.org/licenses/gpl-license.php.
@@ -104,7 +104,7 @@ This order is the default, however, like most things it is customizable.
 Think of it like a pipline: the input of each step is the output of the last
 step.
 
-Each of these things are specified in a +recipe+ file which is describe below. 
+Each of these things are specified in a <tt>recipe</tt> file which is describe below. 
 
 ===CLI===
 
@@ -115,7 +115,7 @@ Each of these things are specified in a +recipe+ file which is describe below.
                                        given order.
       -g, --global FILE                Specify the global recipe file to work
                                        with. Defaults to the file +global.rb+ 
-                                       in the directory of +recipe+ 
+                                       in the directory of <tt>recipe</tt> 
       -s, --set NAME=VALUE             Specify a variable and it's value to 
                                        set. This will be set after loading all
                                        recipe files.
@@ -124,11 +124,11 @@ Each of these things are specified in a +recipe+ file which is describe below.
 ===Introduction===
 * The Backup Recipe format is pure ruby code. Anything that is valid ruby is valid in the recipe file. There are a number of shortcuts that will make your life easier.
 
-* Each of the steps are specified as an +action+. (An action is really nothing more than a method that becomes defined in the Actor instance. See API docs if you're interestd.)
+* Each of the steps are specified as an <tt>action</tt>. (An action is really nothing more than a method that becomes defined in the Actor instance. See API docs if you're interestd.)
 
-* You may create "hook" actions for any of the actions. So if you define a method +before_content+ it will be called just before +content+ is called. A method named +after_rotation+ would be called after rotation. This may not always be needed as you can customize the rotation order to be whatever you want. See [[#XXX]] below. 
+* You may create "hook" actions for any of the actions. So if you define a method <tt>before_content</tt> it will be called just before <tt>content</tt> is called. A method named <tt>after_rotation</tt> would be called after rotation. This may not always be needed as you can customize the rotation order to be whatever you want. See [[#XXX]] below. 
 
-* Each action has the variable +last_result+ available to it. This is the return value of the method that was called previously. Note that this includes the output of the "hook" methods. 
+* Each action has the variable <tt>last_result</tt> available to it. This is the return value of the method that was called previously. Note that this includes the output of the "hook" methods. 
 
 * All configuration variables are available to actions via the hash c[]. For example, the backup path is available to your actions as c[:backup_path].
 
@@ -203,13 +203,15 @@ the scope of this document, but I recommend the following links:
 * link 1
 * link 2
 
+  set :encrypt, true                              # default is +false+
+  set :gpg_encrypt_options, "--default-recipient" # default is an empty string
   action :encrypt, :method => :gpg # default, none
 
 or your own:
 
-  action(:encrypt) 
-    sh "gpg #{last_result}"
-    last_result + ".gpg"
+  action(:encrypt)
+    sh "gpg #{c[:gpg_encrypt_options]} --encrypt #{last_result}"
+    last_result + ".gpg" # ?
   end
 
 ===Delivery===
@@ -252,7 +254,7 @@ Currently the only form of rotation Backup supports is [[grandfather-father-son]
 
   set :rotation_method,  :gfs # this is the default. you don't need to set it, but this is how you could
 
-By deafult, a +son+ is created daily, unless it is a day to create a father or
+By deafult, a <tt>son</tt> is created daily, unless it is a day to create a father or
 grandfather.  It is assumed that every time you run Backup you want to create a
 backup. Therefore, if you do not want to a son etc, do not run the program. 
 You can specify when the son is promoted to a father by the following variable.
@@ -309,7 +311,7 @@ Thankfully, this is incredibly simple:
 that is running the backup script.''
 
 Note a few things here.
-# Each time we +set+ a variable that becomes available to the actions as +c[:var]+
+# Each time we <tt>set</tt> a variable that becomes available to the actions as +c[:var]+
 # 
 
 
@@ -332,16 +334,17 @@ Note a few things here.
 
 
 ==TODO==
-what is left to program:
-* get gpg to work - which means install it on your mac
-* add in better logging 
-* clean up the tests
-* work on the cleanup options 
 
 what is left to do:
+* write the examples
+* start testing it
+* create the gem
 * work on the styles
-* figure out the shorthand for monospace in media wiki
-* setup the mailing lists
-* cleanup the code borrowed from capistrano
-* lookup rdoc syntax highlighting
 
+==TODO==
+* Add in better logging 
+
+==BUGS==
+* You can't +return+ in the user-defined actions for some reason. I think this
+  has to do with the +instance_eval+. But still, I wouldn't think it would
+  matter. I'd be interested in any suggestions on how to fix this.

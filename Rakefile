@@ -25,7 +25,6 @@ Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
-
 desc "Create the rubygem"
 task :gem => "pkg/#{spec.name}-#{spec.version}.gem" do
     puts "generated latest version"

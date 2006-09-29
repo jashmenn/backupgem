@@ -1,7 +1,6 @@
 require 'backup/actor'
 require 'backup/rotator'
 
-
 module Backup
   # Represents a specific Backup configuration. A Configuration instance
   # may be used to load multiple recipe files, define and describe tasks,
@@ -19,35 +18,11 @@ module Backup
     # The hash of variables currently known by the configuration
     attr_reader :variables
 
-    #def initialize(actor_class=Actor) #:nodoc:
     def initialize(actor_class=Actor) #:nodoc:
-      #@roles = Hash.new { |h,k| h[k] = [] }
       @actor = actor_class.new(self)
       #@logger = Logger.new
       @load_paths = [".", File.join(File.dirname(__FILE__), "recipes")]
       @variables = {}
-      #@now = Time.now.utc
-
-      # for preserving the original value of Proc-valued variables
-      set :original_value, Hash.new
-
-      #set :application, nil
-      #set :repository,  nil
-      #set :gateway,     nil
-      #set :user,        nil
-      #set :password,    nil
-
-      #set :ssh_options, Hash.new
-
-      #set(:deploy_to)   { "/u/apps/#{application}" }
-
-      #set :version_dir, DEFAULT_VERSION_DIR_NAME
-      #set :current_dir, DEFAULT_CURRENT_DIR_NAME
-      #set :shared_dir,  DEFAULT_SHARED_DIR_NAME
-      #set :scm,         :subversion
-
-      #set(:revision)    { source.latest_revision }
-
     end
 
     # Set a variable to the given value.
@@ -67,16 +42,8 @@ module Backup
 
     alias :[]= :set
 
-    # Access a named variable. If the value of the variable responds_to? :call,
-    # #call will be invoked (without parameters) and the return value cached
-    # and returned.
     def [](variable)
-      #if @variables[variable].respond_to?(:call)
-      #  self[:original_value][variable] = @variables[variable]
-      #  set variable, @variables[variable].call
-      #end
-
-      # have it throw if it doesn exist
+      # TODO have it raise if it doesn exist
       @variables[variable]
     end
 
@@ -92,8 +59,9 @@ module Backup
       Backup.configuration = original
     end
 
-    # TODO - does this have to be such a ripoff? see if you can make 
-    # this more your own
+    # Disclaimer: This method written by Jamis Buck. Taken directly from his
+    # excellent code Capistrano.
+    #
     # Load a configuration file or string into this configuration.
     #
     # Usage:
@@ -165,19 +133,6 @@ module Backup
 
       actor.define_action(name, options, &block)
     end
-
-
-    #def respond_to?(sym) #:nodoc:
-    #  @variables.has_key?(sym) || super
-    #end
-
-    #def method_missing(sym, *args, &block) #:nodoc:
-    #  if args.length == 0 && block.nil? && @variables.has_key?(sym)
-    #    self[sym]
-    #  else
-    #    super
-    #  end
-    #end
 
   end
 end

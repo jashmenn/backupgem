@@ -19,14 +19,16 @@ set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
 
 # Set global actions
 action :compress, :method => :tar_bz2 
-action :deliver,  :method => :mv    
-#action :deliver,  :method => :scp    
-action :rotate,   :method => :via_mv
-#action :rotate,   :method => :via_ssh
-#action :encrypt,  :method => :gpg
+action :deliver,  :method => :mv      # action :deliver,  :method => :scp    
+action :rotate,   :method => :via_mv  # action :rotate,   :method => :via_ssh
+# action :encrypt,  :method => :gpg
 
 # Specify a directory that backup can use as a temporary directory
 set :tmp_dir, "/tmp"
+
+# Options to be passed to gpg when encrypting
+set :encrypt, false
+set :gpg_encrypt_options, ""
 
 # These settings specify the rotation variables
 # Rotation method. Currently the only method is gfs, grandfather-father-son. 
@@ -65,7 +67,6 @@ end
 action(:scp) do
   # what should the default scp task be?
   # scp the local file to the foreign directory. same name.
-  # todo - specify a key
   c[:servers].each do |server|
     host = server =~ /localhost/ ? "" : "#{server}:"
     sh "scp #{last_result} #{host}#{c[:backup_path]}/"
@@ -75,10 +76,14 @@ end
 
 action(:mv) do
   sh "mv #{last_result} #{c[:backup_path]}/"
-  # backup_path + "/" + last_result
   c[:backup_path] + "/" + File.basename(last_result)
 end
 
-
-# TODO - make it so that the 'set' variables are available to these actions
-# without having to access the config array.
+action(:encrypt) do
+  result = last_result
+  if c[:encrypt]
+    sh "gpg #{c[:gpg_encrypt_options]} --encrypt #{last_result}"
+    result = last_result + ".gpg" # ?
+  end
+  result
+end
