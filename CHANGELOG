@@ -4,3 +4,9 @@
 
 * First stable code in place.
 * Packaged in an gem format
+
+== Version 0.0.3
+
+* Fixed a critical bug that did not allow re-defining the :delivery or :rotate
+  methods. Thanks to James Healy for pointing this out.
+

@@ -52,7 +52,7 @@ set :father_promoted_on, :last_fri_of_the_month
 
 set :sons_to_keep,         14
 set :fathers_to_keep,       6
-set :grandfathers_to_keep,  6   # 6 months
+set :grandfathers_to_keep,  6   # 6 months, by default
 
 
 # -------------------------

@@ -13,7 +13,7 @@ action(:content) do
 end
 
 # action :compress, :method => :tar_bz2   # could be set in global
-# action :delivery, :method => :scp       # could be set in global
+# action :deliver,  :method => :scp       # could be set in global
 
 # settings for backup servers are global unless specified otherwise
 # rotate settings are global unless specified herer

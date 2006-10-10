@@ -130,7 +130,6 @@ module Backup
         options = options.merge(:desc => @next_description)
         @next_description = nil
       end
-
       actor.define_action(name, options, &block)
     end
 

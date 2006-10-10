@@ -4,7 +4,7 @@ class SSHTest < Test::Unit::TestCase
   def setup
     @config = Backup::Configuration.new
     @config.load "standard"
-    @config.action :deliver, :method => :via_ssh 
+    @config.action :deliver, :method => :ssh 
     @actor = Backup::SshActor.new(@config) 
   end
 

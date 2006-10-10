@@ -4,10 +4,10 @@ require 'rake/gempackagetask'
 
 spec = Gem::Specification.new do |s|
   s.name = "backupgem"
-  s.version = "0.0.2"
+  s.version = "0.0.3"
   s.author = "Nate Murray"
   s.email = "nate@natemurray.com"
-  s.homepage = "http://www.natemurray.com/"
+  s.homepage = "http://tech.natemurray.com/backup"
   s.platform = Gem::Platform::RUBY
   s.summary = "Beginning-to-end solution for backups and rotation."
   s.files = FileList["{bin,lib,tests,examples,doc}/**/*"].to_a

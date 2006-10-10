@@ -114,7 +114,7 @@ Each of these things are specified in a <tt>recipe</tt> file which is describe b
                                        may be specified, and are loaded in the 
                                        given order.
       -g, --global FILE                Specify the global recipe file to work
-                                       with. Defaults to the file +global.rb+ 
+                                       with. Defaults to the file <tt>global.rb</tt> 
                                        in the directory of <tt>recipe</tt> 
       -s, --set NAME=VALUE             Specify a variable and it's value to 
                                        set. This will be set after loading all
@@ -203,7 +203,7 @@ the scope of this document, but I recommend the following links:
 * link 1
 * link 2
 
-  set :encrypt, true                              # default is +false+
+  set :encrypt, true                              # default is <tt>false</tt>
   set :gpg_encrypt_options, "--default-recipient" # default is an empty string
   action :encrypt, :method => :gpg # default, none
 
@@ -218,15 +218,15 @@ or your own:
 ====Action====
 Delivery is supported via <tt>scp</tt>, <tt>ftp</tt>, and <tt>mv</tt>
 
-  action :delivery, :method => :scp
-  action :delivery, :method => :ftp
-  action :delivery, :method => :mv
+  action :deliver, :method => :scp
+  action :deliver, :method => :ftp
+  action :deliver, :method => :mv
 
 The <tt>:mv</tt> action is defined like any user-defined action:
 
   action(:mv) do
     sh "mv #{last_result} #{c[:backup_path]}/"
-    c[:backup_path] + "/" + File.basename(last_result)
+    c[:backup_path] <tt> "/" </tt> File.basename(last_result)
   end
 
 ====Variables====
@@ -280,6 +280,12 @@ Say for instance that I wanted to promote to fathers on monday, wednesday and fr
 
 See the [[Runt documentation]] for more information on this.
 
+You can set how many of each rank to keep:
+
+set :sons_to_keep,         14
+set :fathers_to_keep,       6
+set :grandfathers_to_keep,  6   
+
 ==Examples==
 
 Here we will cover three examples. 
@@ -287,19 +293,44 @@ Here we will cover three examples.
 # a more complex implementation, show the variables you can set show the customizability and use of foreign server
 # every more complex. define your own method, use a global file to share in the configuration.
 
-===Example One: SQL Backup===
-Our first example will be backing up a MediaWiki installation. Say we have a MySQL database named
-'mediawiki'. What we want is to:
-* create a dump of the database every day
-* compress this backup and store it in a local folder
-* store 2 weeks of daily backups (son)
+===Example One: Backup folder of Logs===
+Our first example will be backing up a folder of logs. Say we have a folder
+'/var/my_logs/' and it is full of log files. It's full. Seriously, it's getting
+stuffy in there. 
+Anyway, what we want is to:
+* move out all the old log files
+* compress them and store them in a local folder
+* store 2 weeks of daily backups (sons)
 * store a weekly backup (father) going back 6 weeks
 * and create a monthly backup on the last friday of every month (grandfather) for 6 months
 
 Thankfully, this is incredibly simple:
 
+  set :backup_path, "/var/local/backups/my_old_logs"
+  set :tmp_dir, "/tmp" # this is the default so you actually dont have to specify it
+  action :content, :is_contents_of => "/var/my_logs"
+
+''In this case, make sure that <tt>:backup_path</tt> and <tt>:tmp_dir</tt> are writable by the user
+that is running the backup script.''
+
+And thats it!
+
+Note a few things here.
+# Each time we <tt>set</tt> a variable that becomes available to the actions as <tt>c[:var]</tt>
+
+===Example Two: SQL Backup===
+Our second example will be backing up a MediaWiki installation. 
+Say we have a MySQL database named 'mediawiki'. 
+What we want is to:
+* create a dump of the database every day
+* compress this backup and store it in a local folder
+* store 2 weeks of daily backups (son) [same as last time]
+* store "father" backups every monday,wednesday and friday going back 6 weeks
+* and create a monthly backup on the last friday of every month (grandfather) for 6 months
+
+Thankfully, this is incredibly simple:
+
   set :backup_path, "/var/local/backups/mediawiki"
-  set :tmp_dir, "/tmp"
 
   action(:content) do
     dump = c[:tmp_dir] + "/mediawiki.sql"
@@ -307,44 +338,50 @@ Thankfully, this is incredibly simple:
     dump # make sure you return the name of the file
   end
 
-''In this case, make sure that +:backup_path+ and +:tmp_dir+ are writable by the user
-that is running the backup script.''
+  action :deliver, :method => :scp
+  action :rotate,   :method => :via_ssh
 
-Note a few things here.
-# Each time we <tt>set</tt> a variable that becomes available to the actions as +c[:var]+
-# 
+  set :servers,           %w{ my.server.com }
 
+  set :son_promoted_on,    :sun
+  set :father_promoted_on, :last_sun_of_the_month
 
-===Example Two: Folder of Logs===
+  set :sons_to_keep,         21  
+  set :fathers_to_keep,      12
+  set :grandfathers_to_keep, 12 
 
-  There is a group of files in /var/us/feeds
-  create a new directory
-  move the files into the new directory
-  tar bz2 it
-  move it to the external harddisk
-  After 30 days, delete the last one.
+===Example Three: Something more complex===
 
-  package :contents_of => "/var/us/feeds",  # package :folder => "/foo/folder" - beware of race conditions!
-          :with => "tar_bz"                 # this is a "package helper" method that is passed some variables
-  this:
-  creates a temporary folder                                  # permissions
-  moves the contents of /var/us/feeds to the temporary folder # permissions
-  calls tar_bz on this folder which tar bzips the file and returns the filename
-  package sets the variable @package with the name of the packed file   
+  action :content,  :is_file => "/path/to/file.abc"
+  action :compress, :method  => :my_tar_gzip
 
+  action(:my_tar_gzip) do
+    name = c[:tmp_dir] + "/" + File.basename(last_result) + ".tar.gzip"
+    sh "tar -czv --exclude .DS* --exclude CVS  #{last_result} > #{name}"
+    name # make sure you return the name of the
+  end
+
+  set :encrypt, true
+
+  action :deliver,  :method => :scp  
+  action :rotate,   :method => :via_ssh
+
+  set :ssh_user,          "backup_user"
+  set :identity_key,      ENV['HOME'] + "/.ssh/backup_key"
+
+* how to setup the cron job
 
 ==TODO==
 
 what is left to do:
-* write the examples
 * start testing it
-* create the gem
 * work on the styles
+* lookup setup.rb files
 
 ==TODO==
 * Add in better logging 
 
 ==BUGS==
-* You can't +return+ in the user-defined actions for some reason. I think this
-  has to do with the +instance_eval+. But still, I wouldn't think it would
+* You can't <tt>return</tt> in the user-defined actions for some reason. I think this
+  has to do with the <tt>instance_eval</tt>. But still, I wouldn't think it would
   matter. I'd be interested in any suggestions on how to fix this.

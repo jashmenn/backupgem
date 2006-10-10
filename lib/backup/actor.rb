@@ -71,7 +71,7 @@ module Backup
     def define_action(name, options={}, &block)
       @action[name] = (options[:action_class] || Action).new(name, self, options)
 
-      if self.respond_to?(name) && !block_given? 
+      if self.respond_to?(name) && !( block_given? || options[:method] )
         # if it was already defined and we aren't trying to re-define it then
         # what we are trying to do is define it the same way it is defined now
         # only with options being sent to it. 
