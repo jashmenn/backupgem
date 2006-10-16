@@ -1,12 +1,18 @@
 = Backup Changelog
 
-== Version 0.0.2
+== Version 0.0.4
 
-* First stable code in place.
-* Packaged in an gem format
+* Fixed a bug in 'scp' in the standard recipe that ignored the user when using
+  scp. Thanks to Colin Slater for catching this.
 
 == Version 0.0.3
 
 * Fixed a critical bug that did not allow re-defining the :delivery or :rotate
   methods. Thanks to James Healy for pointing this out.
+
+== Version 0.0.2
+
+* First stable code in place.
+* Packaged in an gem format
+
 

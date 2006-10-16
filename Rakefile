@@ -4,7 +4,7 @@ require 'rake/gempackagetask'
 
 spec = Gem::Specification.new do |s|
   s.name = "backupgem"
-  s.version = "0.0.3"
+  s.version = "0.0.4"
   s.author = "Nate Murray"
   s.email = "nate@natemurray.com"
   s.homepage = "http://tech.natemurray.com/backup"
