@@ -69,7 +69,7 @@ action(:scp) do
   # scp the local file to the foreign directory. same name.
   c[:servers].each do |server|
     host = server =~ /localhost/ ? "" : "#{server}:"
-    sh "scp #{last_result} #{host}#{c[:backup_path]}/"
+    sh "scp #{last_result} #{c[:ssh_user]}@#{host}#{c[:backup_path]}/"
   end
   c[:backup_path] + "/" + File.basename(last_result)  
 end
