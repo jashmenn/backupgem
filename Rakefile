@@ -4,7 +4,7 @@ require 'rake/gempackagetask'
 
 spec = Gem::Specification.new do |s|
   s.name = "backupgem"
-  s.version = "0.0.4"
+  s.version = "0.0.5"
   s.author = "Nate Murray"
   s.email = "nate@natemurray.com"
   s.homepage = "http://tech.natemurray.com/backup"
@@ -15,7 +15,7 @@ spec = Gem::Specification.new do |s|
   s.autorequire = "backupgem"
   s.test_files = FileList["{tests}/**/*test.rb"].to_a
   s.has_rdoc = true
-  s.extra_rdoc_files = ["README", "CHANGELOG"]
+  s.extra_rdoc_files = ["README", "CHANGELOG", "TODO"]
   s.add_dependency("rake", ">= 0.7.1")
   s.add_dependency("runt", ">= 0.3.0")
   s.add_dependency("net-ssh", ">= 1.0.9")

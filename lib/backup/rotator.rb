@@ -59,6 +59,15 @@ module Backup
 #      ftp.close
     end
 
+    def rotate_via_s3(last_result)
+      s3 = Backup::S3Actor.new(c)
+      s3.verify_rotation_hierarchy_exists(hierarchy)
+      index = s3.rotation
+      index[todays_generation] << last_result
+      s3.rotation = index
+      s3.cleanup(todays_generation, how_many_to_keep_today)
+    end
+
     def create_sons_today?;     is_today_a? :son_created_on;     end
     def promote_sons_today?;    is_today_a? :son_promoted_on;    end
     def promote_fathers_today?; is_today_a? :father_promoted_on; end
@@ -110,18 +119,21 @@ module Backup
                   promote_sons_today?    ? "fathers"      : "sons"
       end
 
+      def self.timestamped_prefix(name)
+        newname = Time.now.strftime("%Y-%m-%d-%H-%M-%S_") + File.basename(name)
+      end
+      
+      # Given +name+ returns a timestamped version of name. 
+      def timestamped_prefix(name)
+        Backup::Rotator.timestamped_prefix(name)
+      end
+
       private
       def place_in
         goes_in = todays_generation
         place_in = c[:backup_path] + "/" + goes_in
       end
  
-
-      # Given +name+ returns a timestamped version of name. 
-      def timestamped_prefix(name)
-        newname = Time.now.strftime("%Y-%m-%d-%H-%M-%S_") + File.basename(name)
-      end
-
       # Returns the number of sons to keep. Looks for config values +:sons_to_keep+, 
       # +:son_promoted_on+. Default +14+.
       def sons_to_keep

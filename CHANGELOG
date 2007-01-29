@@ -1,5 +1,9 @@
 = Backup Changelog
 
+== Version 0.0.5
+* Added Amazon s3 support. Thanks to Jason Perry for this patch.
+* Added an option for ssh port. Thanks to Frank Oxener for this patch.
+
 == Version 0.0.4
 
 * Fixed a bug in 'scp' in the standard recipe that ignored the user when using

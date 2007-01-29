@@ -113,6 +113,7 @@ module Backup
     def via_mv;  rotator.rotate_via_mv(last_result);   end
     def via_ssh; rotator.rotate_via_ssh(last_result);  end
     def via_ftp; rotator.rotate_via_ftp(last_result);  end
+    def via_s3;  rotator.rotate_via_s3(last_result);   end
 
     # By default, +:content+ can perform one of three actions
     # * +:is_file+

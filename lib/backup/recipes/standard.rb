@@ -14,6 +14,9 @@ set :action_order,      %w{ content compress encrypt deliver rotate cleanup }
 # Name of the SSH user
 set :ssh_user,          ENV['USER']
 
+# default port
+set :port,          21 # todo, change to ssh_port
+
 # Path to your SSH key
 set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
 
@@ -77,6 +80,11 @@ end
 action(:mv) do
   sh "mv #{last_result} #{c[:backup_path]}/"
   c[:backup_path] + "/" + File.basename(last_result)
+end
+
+action(:s3) do
+  s3 = S3Actor.new(c)
+  s3.put last_result
 end
 
 action(:encrypt) do
