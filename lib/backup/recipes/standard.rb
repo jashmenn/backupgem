@@ -15,7 +15,7 @@ set :action_order,      %w{ content compress encrypt deliver rotate cleanup }
 set :ssh_user,          ENV['USER']
 
 # default port
-set :port,          21 # todo, change to ssh_port
+set :port,          22 # todo, change to ssh_port
 
 # Path to your SSH key
 set :identity_key,      ENV['HOME'] + "/.ssh/id_rsa"
