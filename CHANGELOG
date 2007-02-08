@@ -1,4 +1,7 @@
 = Backup Changelog
+== Version 0.0.7
+* Fixed the default ssh port. It was wrong in version 0.0.6
+* Added a 'rake test' task
 
 == Version 0.0.6
 * Added a default port
