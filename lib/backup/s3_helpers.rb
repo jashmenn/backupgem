@@ -57,7 +57,7 @@ module Backup
     # Create it if it does not exist
     def verify_rotation_hierarchy_exists(hierarchy)
       begin
-        index = rotation
+        index = self.rotation
         verified_index = index.merge(init_rotation_index(hierarchy)) { |m,x,y| x ||= y }
         unless (verified_index == index)
           self.rotation = verified_index
@@ -78,6 +78,8 @@ module Backup
         extra_key = keys.shift
         delete extra_key
       end
+      # store updated index
+      self.rotation = keys
     end
 
     private
