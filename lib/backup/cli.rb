@@ -24,7 +24,7 @@ module Backup
                     :global => nil  }
 
       OptionParser.new do |opts|
-        opts.banner = "Usage: #{$0} [options] [args]"
+        opts.banner = "Usage: #{$0} [options]"
 
         opts.separator ""
         opts.separator "Recipe Options -----------------------"

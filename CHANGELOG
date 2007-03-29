@@ -1,4 +1,9 @@
 = Backup Changelog
+== Version 0.0.8
+* The attached patch will add the 'backup' executable to your bin path using
+   the built-in RubyGems method for adding things to bin. Thanks to Anthony
+   Eden (aeden) for this patch.
+
 == Version 0.0.7
 * Fixed the default ssh port. It was wrong in version 0.0.6
 * Added a 'rake test' task
