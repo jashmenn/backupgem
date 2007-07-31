@@ -63,7 +63,8 @@ set :grandfathers_to_keep,  6   # 6 months, by default
 # -------------------------
 action(:tar_bz2) do
   name = c[:tmp_dir] + "/" + File.basename(last_result) + ".tar.bz2"
-  sh "tar -cvjf #{name} #{last_result}"
+  v = "v" if verbose
+  sh "tar -c#{v}jf #{name} #{last_result}"
   name
 end
 
@@ -78,7 +79,8 @@ action(:scp) do
 end
 
 action(:mv) do
-  sh "mv #{last_result} #{c[:backup_path]}/"
+  move last_result, c[:backup_path]  # has to be move (not mv) to avoid infinite
+                                     # recursion
   c[:backup_path] + "/" + File.basename(last_result)
 end
 

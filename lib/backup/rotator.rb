@@ -20,7 +20,7 @@ module Backup
 
       # place todays backup into the specified directory with a timestamp. 
       newname = timestamped_prefix(last_result)
-      sh "mv #{last_result} #{place_in}/#{newname}"
+      mv last_result, "#{place_in}/#{newname}"
 
       cleanup_via_mv(place_in, how_many_to_keep_today)
     end
@@ -86,7 +86,7 @@ module Backup
         path = c[:backup_path]
         full = path + "/" + dir
         unless File.exists?(full) 
-          sh "mkdir -p #{full}"  
+          mkdir_p full  
         end
       end
 
@@ -104,7 +104,7 @@ module Backup
 
         1.upto( diff ) do 
           extra = files.shift
-          sh "rm #{extra}"
+          rm extra
         end
       end
 
@@ -119,17 +119,24 @@ module Backup
                   promote_sons_today?    ? "fathers"      : "sons"
       end
 
-      def self.timestamped_prefix(name)
-        newname = Time.now.strftime("%Y-%m-%d-%H-%M-%S_") + File.basename(name)
+      def self.timestamped_prefix(name,time="%Y-%m-%d-%H-%M-%S")
+        time ||= "%Y-%m-%d-%H-%M-%S"  # there has to be a better way to do this
+                                      # but it works.
+        newname = Time.now.strftime(time) + "_" + File.basename(name)
       end
       
       # Given +name+ returns a timestamped version of name. 
       def timestamped_prefix(name)
-        Backup::Rotator.timestamped_prefix(name)
+        Backup::Rotator.timestamped_prefix(name,c[:timestamp])
       end
 
       private
       def place_in
+        # TODO this should be smarter.
+        # here is where you check to see what today is. check "todays
+        # generation" and then touch a file if you haven't made it. well touch
+        # the file after you have. then if that file already exists you say
+        # "son"
         goes_in = todays_generation
         place_in = c[:backup_path] + "/" + goes_in
       end

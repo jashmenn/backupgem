@@ -155,10 +155,13 @@ module Backup
         orig   = opts[:is_contents_of]
         tmpdir = c[:tmp_dir] + "/tmp_" + Time.now.strftime("%Y%m%d%H%M%S") +"_#{rand}"
         new_orig = tmpdir + "/" + File.basename(orig)
-        sh "mkdir #{tmpdir}"
-        sh "mkdir #{new_orig}"
-        cmd = opts[:copy] ? "cp -r" : "mv"
-        sh "#{cmd} #{orig}/* #{new_orig}/"
+        mkdir_p tmpdir
+        mkdir_p new_orig
+        if opts[:copy]
+          cp_r orig + '/.', new_orig
+        else
+          mv orig + '/.', new_orig
+        end
         dirty_file new_orig
         return new_orig
       end
@@ -175,7 +178,7 @@ module Backup
     # +cleanup+ takes every element from @dirty_files and performs an +rm -rf+ on the value
     def cleanup(opts={})
       dirty_files.each do |f|
-        sh "rm -rf #{f}"
+        rm_rf f
       end
     end
 

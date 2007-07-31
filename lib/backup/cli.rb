@@ -49,6 +49,10 @@ module Backup
           "file +global.rb+ in the same directory." 
         ) { |value| @options[:recipes] << value }
 
+        opts.on("-q", "--quiet",
+              "suppresses much of the output of backup, except",
+              "for error messages") { verbose(false) }
+
         if args.empty?
           puts opts
           exit
