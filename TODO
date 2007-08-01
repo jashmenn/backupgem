@@ -1,0 +1,7 @@
+== 2007-01-26
+* Write some better tests
+* Create a "rake test" task
+* Create rake tasks for generating documentation
+* Move documentation maker to this project
+* Add documentation for s3
+* Add documentation for ssh port

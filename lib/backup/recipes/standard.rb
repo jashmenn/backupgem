@@ -38,6 +38,13 @@ set :gpg_encrypt_options, ""
 # Read more about that below
 set :rotation_method,  :gfs
 
+# rotation mode - temporal or numeric. For instance
+# temporal mode would continue to be the default and work with
+# :son_promoted_on. The promotions are based on days. This works well for 1 backup per day.
+# numeric works by promoting after every number of creations. This is better for multiple backups per day.
+# numeric mode uses :sons_promoted_after
+set :rotation_mode, :temporal
+
 # :mon-sun
 # :last_day_of_the_month # whatever son_promoted on son was, but the last of the month
 # everything else you can define with a Runt object
@@ -57,6 +64,11 @@ set :sons_to_keep,         14
 set :fathers_to_keep,       6
 set :grandfathers_to_keep,  6   # 6 months, by default
 
+# These options are only used if :rotation_mode is :numeric.
+# This is better if you are doing multiple backups per day.
+# This setting says that every 14th son will be promoted to a father. 
+set :sons_promoted_after,         14
+set :fathers_promoted_after,       6
 
 # -------------------------
 # Standard Actions

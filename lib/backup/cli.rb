@@ -1,5 +1,6 @@
 require 'optparse'
 require 'backup'
+require 'yaml'
 
 module Backup
   # The CLI class encapsulates the behavior of backup when it is invoked
@@ -30,9 +31,8 @@ module Backup
         opts.separator "Recipe Options -----------------------"
         opts.separator ""
 
-        opts.on("-r", "--recipe RECIPE",
-          "A recipe file to load. Multiple recipes may",
-          "be specified, and are loaded in the given order."
+        opts.on("-r", "--recipe RECIPE ",
+          "A recipe file to load. Multiple recipes is DEPRECATED and not fully functional."
         ) { |value| @options[:recipes] << value }
 
         opts.on("-s", "--set NAME=VALUE",
@@ -78,7 +78,7 @@ module Backup
 
     private
       def check_options!
-        # performa sanity check
+        # perform a sanity check
       end
 
       # Load the recipes specified by the options, and execute the actions
@@ -95,7 +95,14 @@ module Backup
           global = options[:global] || File.dirname(recipe) + "/global.rb"
           config.load global if File.exists? global    # cache this?
         end
-        options[:recipes].each { |recipe| config.load(recipe) }
+
+        options[:recipes].each_with_index do |recipe,i|
+          config.load(recipe) 
+          $state = setup_saved_state(recipe, config) 
+          warn "DEPRICATED: Using multiple recipes with one command is deprecated for the time being. Just run a different command if you want to do two recipes at the same time" if i > 0
+
+        end
+
         #options[:vars].each { |name, value| config.set(name, value) }
 
         actor = config.actor
@@ -104,6 +111,34 @@ module Backup
         #options[:actions].each { |action| actor.send action }
       end
 
+      
+      # Setup the persistant state using madeline
+      def setup_saved_state(recipe, config)
+        if defined? ::NO_NUMERIC_ROTATION
+            if :numeric == config[:rotation_mode]
+              puts "Missing Gem: :numeric :rotation mode is not valid unless you have madeleine installed. try: 'gem install madeleine'"
+              exit 1
+            end
+            return nil
+        end
+
+        saved_state_folder = config[:saved_state_folder] || File.join(config[:backup_path], ".backupgem_#{File.basename(recipe)}_state")
+
+        state = SnapshotMadeleine.new(saved_state_folder, YAML) do
+          StateRecorder.new
+        end
+        state.system.saved_state_folder = saved_state_folder
+        state
+      end
+
   end    
 end
+
+at_exit { 
+
+  if !defined?(::NO_NUMERIC_ROTATION) && defined?($state)
+    $state.take_snapshot
+    $state.system.cleanup_snapshots
+  end
+}
 

@@ -18,11 +18,33 @@ module Backup
       # verify that each of the directories exist, grandfathers, fathers, sons
       hierarchy.each { |m| verify_local_backup_directory_exists(m) }
 
+      where = place_in
+
       # place todays backup into the specified directory with a timestamp. 
       newname = timestamped_prefix(last_result)
-      mv last_result, "#{place_in}/#{newname}"
+      mv last_result, "#{where}/#{newname}"
 
-      cleanup_via_mv(place_in, how_many_to_keep_today)
+      cleanup_via_mv(where, how_many_to_keep_today)
+      update_state
+    end
+
+    def update_state
+      return unless :numeric == c[:rotation_mode] 
+      where = find_goes_in_by_state
+
+      previous_sons     = $state.system.sons_since_last_promotion    || 0
+      previous_fathers  = $state.system.fathers_since_last_promotion || 0
+
+      case where
+        when "sons"
+         $state.system.sons_since_last_promotion = previous_sons + 1
+        when "fathers"
+         $state.system.sons_since_last_promotion = 0
+         $state.system.fathers_since_last_promotion = previous_fathers + 1
+        when "grandfathers"
+         $state.system.sons_since_last_promotion = 0
+         $state.system.fathers_since_last_promotion = 0
+      end
     end
     
     def rotate_via_ssh(last_result)
@@ -35,10 +57,12 @@ module Backup
         ssh.verify_directory_exists(dir) 
       end  
 
-      newname = timestamped_prefix(last_result)
-      ssh.run "mv #{last_result} #{place_in}/#{newname}"
+      where = place_in
 
-      ssh.cleanup_directory(place_in, how_many_to_keep_today)
+      newname = timestamped_prefix(last_result)
+      ssh.run "mv #{last_result} #{where}/#{newname}"
+
+      ssh.cleanup_directory(where, how_many_to_keep_today)
       ssh.close
     end
 
@@ -131,14 +155,35 @@ module Backup
       end
 
       private
+
+      # Decide where to place the next backup. g,f,or s. See the standard
+      # config for a description of the difference between numeric and temporal
+      # rotation mode
       def place_in
-        # TODO this should be smarter.
-        # here is where you check to see what today is. check "todays
-        # generation" and then touch a file if you haven't made it. well touch
-        # the file after you have. then if that file already exists you say
-        # "son"
-        goes_in = todays_generation
+        if :numeric == c[:rotation_mode]
+          goes_in = find_goes_in_by_state       
+        else
+          goes_in = todays_generation
+        end
+
         place_in = c[:backup_path] + "/" + goes_in
+      end
+
+      def find_goes_in_by_state
+        previous_sons     = $state.system.sons_since_last_promotion    || 0
+        previous_fathers  = $state.system.fathers_since_last_promotion || 0
+
+        #puts "in find goes in"
+        #puts "sons since last: " + $state.system.sons_since_last_promotion.to_s
+        #puts "fathers since last: " + $state.system.fathers_since_last_promotion.to_s
+
+        if previous_sons >= c[:sons_promoted_after] 
+          if previous_fathers >= c[:fathers_promoted_after]
+            return "grandfathers"
+          end
+          return "fathers"
+        end
+        "sons"
       end
  
       # Returns the number of sons to keep. Looks for config values +:sons_to_keep+, 
