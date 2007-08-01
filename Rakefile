@@ -23,6 +23,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency("rake", ">= 0.7.1")
   s.add_dependency("runt", ">= 0.3.0")
   s.add_dependency("net-ssh", ">= 1.0.9")
+  s.add_dependency("madeleine", ">= 0.7.3")
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
