@@ -165,8 +165,16 @@ module Backup
         dirty_file new_orig
         return new_orig
       end
+      if opts[:is_hg_repository]
+        orig = opts[:is_hg_repository]
+        name = opts[:as] || File.basename(orig)
+        new_orig = c[:tmp_dir] + '/' + name
+        sh "hg clone #{orig} #{new_orig}"
+        dirty_file new_orig
+        return new_orig
+      end
       raise "Unknown option in :content. Try :is_file, :is_folder " +
-            "or :is_contents_of"
+            ":is_contents_of or :is_hg_repository"
     end
 
     # Given name of a file in +string+ adds that file to @dirty_files. These
