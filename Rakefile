@@ -21,10 +21,10 @@ spec = Gem::Specification.new do |s|
   s.has_rdoc = true
   s.extra_rdoc_files = ["README", "CHANGELOG", "TODO", "Rakefile"]
   s.rubyforge_project = "backupgem"
-  #s.add_dependency("rake", ">= 0.7.1")
-  #s.add_dependency("runt", ">= 0.3.0")
-  #s.add_dependency("net-ssh", ">= 1.0.9")
-  #s.add_dependency("madeleine", ">= 0.7.3")
+  s.add_dependency("rake", ">= 0.7.1")
+  s.add_dependency("runt", ">= 0.3.0")
+  s.add_dependency("net-ssh", ">= 1.0.9")
+  s.add_dependency("madeleine", ">= 0.7.3")
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
@@ -48,3 +48,5 @@ task :reinstall => [:package] do
   `sudo gem uninstall -x #{spec.name}`
   `sudo gem install pkg/#{spec.name}-#{spec.version}`
 end
+
+# rm -f pkg/backupgem-0.0.8.gem ; rake gem; sudo gem install --local pkg/backupgem-0.0.8.gem
