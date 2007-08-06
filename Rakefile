@@ -6,7 +6,7 @@ require 'rake/testtask'
 
 spec = Gem::Specification.new do |s|
   s.name = 'backupgem'
-  s.version = '0.0.8'
+  s.version = '0.0.9'
   s.author = "Nate Murray"
   s.email = "nate@natemurray.com"
   s.homepage = "http://tech.natemurray.com/backup"
