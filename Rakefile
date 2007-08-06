@@ -1,6 +1,7 @@
 require 'rubygems'
 Gem::manage_gems
 require 'rake/gempackagetask'
+require 'rake/contrib/rubyforgepublisher'
 require 'rake/testtask'
 
 spec = Gem::Specification.new do |s|
@@ -11,7 +12,7 @@ spec = Gem::Specification.new do |s|
   s.homepage = "http://tech.natemurray.com/backup"
   s.platform = Gem::Platform::RUBY
   s.summary = "Beginning-to-end solution for backups and rotation."
-  s.files = FileList["{bin,lib,tests,examples,doc}/**/*"].to_a
+  s.files = FileList["{bin,lib,tests,examples,doc}/**/*.{txt,html,css}"].to_a
   s.require_path = "lib"
   s.autorequire = "backupgem"
   s.test_files = FileList["{tests}/**/*test.rb"].to_a
@@ -26,6 +27,7 @@ spec = Gem::Specification.new do |s|
   s.add_dependency("net-ssh", ">= 1.0.9")
   s.add_dependency("madeleine", ">= 0.7.3")
 end
+GEMSPEC = spec
 
 Rake::GemPackageTask.new(spec) do |pkg|
   pkg.need_tar = true
@@ -50,3 +52,11 @@ task :reinstall => [:package] do
 end
 
 # rm -f pkg/backupgem-0.0.8.gem ; rake gem; sudo gem install --local pkg/backupgem-0.0.8.gem
+
+desc "Publish the release files to RubyForge."
+task :release => [ :gem ] do
+  `rubyforge login`
+  release_command = "rubyforge add_release #{GEMSPEC.name} #{GEMSPEC.name} 'REL #{GEMSPEC.version}' pkg/#{GEMSPEC.name}-#{GEMSPEC.version}.gem"
+  puts release_command
+  system(release_command)
+end
