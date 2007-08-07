@@ -6,7 +6,7 @@
 # The settings contained in this file will be global for all tasks and can be
 # overridden locally.
 #------------------------------------------------------------------------------
-require 'tmpdir'
+# require 'tmpdir'
 
 # Sepcify sever settings
 set :servers,           %w{ localhost }
@@ -28,7 +28,8 @@ action :rotate,   :method => :via_mv  # action :rotate,   :method => :via_ssh
 # action :encrypt,  :method => :gpg
 
 # Specify a directory that backup can use as a temporary directory
-set :tmp_dir, Dir.tmpdir
+# set :tmp_dir, Dir.tmpdir
+set :tmp_dir, "/tmp"
 
 # Options to be passed to gpg when encrypting
 set :encrypt, false
