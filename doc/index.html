@@ -1,0 +1,716 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>BackupGem Manual</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+<meta name="generator" content="Click">
+  <style type="text/css">
+    @import url("styles.css");
+  </style>
+</head>
+<body>
+<div id="container">
+<div id="header"><h1>BackupGem Manual</h1></div>
+
+<div id="wrapper">
+<div id="content">
+
+<div class="rightad">
+  <script type="text/javascript"><!--
+  google_ad_client = "pub-0934913060779093";
+  google_ad_width = 120;
+  google_ad_height = 600;
+  google_ad_format = "120x600_as";
+  google_ad_type = "image";
+  //2006-10-06: backup_skyscraper1
+  google_ad_channel ="7310496335";
+  //--></script>
+  <script type="text/javascript"
+    src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+  </script>
+</div>
+
+
+
+
+
+ <a name="Introduction"></a><h2>Introduction</h2>
+  
+    <a name="Introduction_Welcome"
+    ></a><h3>Welcome</h3>
+    <p><code><span class="constant">Backup</span></code> is the easiest and most flexible backup, archive and rotate tool.  It&#8217;s a beginning-to-end solution for scheduled backups in a clean ruby package that is simple use and powerful when customized.
+Backup allows you to specify each of the following options:</p>
+
+
+	<ul>
+	<li>what is being archived (files, folders, arbitrary scripts)</li>
+		<li>how it&#8217;s being archived (tar gzip, bz2)</li>
+		<li>where the archive is going (multiple backup servers? easy)</li>
+		<li>how the archive is going to get there (scp, ftp, mv)</li>
+		<li>where is will be stored when it gets there</li>
+		<li>how it&#8217;s going to be rotated when it gets there (grandfather-father-son, etc)</li>
+		<li>how often will this process happen (customizable cycles)</li>
+		<li>what happens to the working copy after the process (recreate files, folders etc. restart daemons)</li>
+	</ul>
+
+
+	<p>Backup is a collection of scripts that is complete enough to save you time, but flexible enough to work with any situation.
+This is an early version of <code><span class="constant">Backup</span></code>.  Please feel free to ask questions on how to use <code><span class="constant">Backup</span></code> or post suggestions for this manual in the <a href="http://rubyforge.org/mailman/listinfo/backupgem-users">mailing lists</a></p>
+   
+  
+
+
+ <a name="Housekeeping"></a><h2>Housekeeping</h2>
+  
+    <a name="Housekeeping_Prerequisites"
+    ></a><h3>Prerequisites</h3>
+    <p><code><span class="constant">Backup</span></code> makes the following assumptions about your machines:</p>
+
+
+	<ul>
+	<li>server and client understand <span class="caps">POSIX</span> commmands</li>
+		<li>passwords and paths are the same on each backup server</li>
+	</ul>
+
+
+	<p><code><span class="constant">Backup</span></code> depends on the following libraries:</p>
+
+
+	<ul>
+	<li><a href="http://runt.rubyforge.org/">Runt</a> for describing temporal ranges.</li>
+		<li><a href="http://net-ssh.rubyforge.org/">Net::SSH</a> for <span class="caps">SSH</span> backups</li>
+		<li><a href="http://www.ruby-doc.org/stdlib/libdoc/net/ftp/rdoc/index.html">Net::FTP</a> for <span class="caps">FTP</span> backups</li>
+	</ul>
+
+
+	<p>These are listed as dependencies in the gem file so you should be prompted to install them when you install Backup.</p>
+  
+    <a name="Housekeeping_Using_RubyGems"
+    ></a><h3>Using RubyGems</h3>
+    If you have <a href="http://rubygems.rubyforge.org">RubyGems</a> installed, installing Backup is simple:
+	<blockquote>
+		<p><code><span class="ident">sudo</span> <span class="ident">gem</span> <span class="ident">install</span> <span class="ident">backupgem</span></code></p>
+	</blockquote>
+  
+    <a name="Housekeeping_Using_svn"
+    ></a><h3>Using svn</h3>
+    If you prefer, you can checkout backupgem from the <a href="http://rubyforge.org/scm/?group_id=2110">RubyForge Repository</a>. Feel free to browse the releases or trunk <a href="http://rubyforge.org/scm/?group_id=2110">here</a>.
+	<blockquote>
+		<p><code><span class="ident">svn</span> <span class="ident">checkout</span> <span class="ident">svn</span><span class="punct">+</span><span class="ident">ssh</span><span class="punct">:/</span><span class="regex"></span><span class="punct">/</span><span class="ident">rubyforge</span><span class="punct">.</span><span class="ident">org</span><span class="punct">/</span><span class="ident">var</span><span class="punct">/</span><span class="ident">svn</span><span class="punct">/</span><span class="ident">backupgem</span></code></p>
+	</blockquote>
+  
+    <a name="Housekeeping_License_Information"
+    ></a><h3>License Information</h3>
+    <p>Backup is made available under either the <span class="caps">BSD</span> license, or the same license Ruby (which, by extension, also allows the <span class="caps">GPL</span> as a permissable license as well). You can view the full text of any of these licenses in the <code><span class="ident">doc</span></code> subdirectory of the Backup distrubtion. The texts of the <span class="caps">BSD</span> and <span class="caps">GPL</span> licenses are also available online: <a href="http://www.opensource.org/licenses/bsd-license.php"><span class="caps">BSD</span></a> and <a href="http://www.opensource.org/licenses/gpl-license.php"><span class="caps">GPL</span></a>.</p>
+
+
+	<p>If you desire permission to use either Backup in a manner incompatible with these licenses, please contact the copyright holder <a href="mailto:nate+backup@natemurray.com">Nate Murray</a> in order to negotiate a more compatible license.</p>
+  
+    <a name="Housekeeping_Support"
+    ></a><h3>Support</h3>
+    <p>Mailing lists, bug trackers, feature requests, and public forums are all available courtesty of <a href="http://rubyforge.org">RubyForge</a> at the  <a href="http://rubyforge.org/projects/backupgem">BackupGem project page</a>.</p>
+  
+    <a name="Housekeeping_Mailing_Lists"
+    ></a><h3>Mailing Lists</h3>
+    <table>
+		<tr>
+			<th>List Name </th>
+			<th>&nbsp; </th>
+			<th>Desc.  </th>
+		</tr>
+		<tr>
+			<td> <a href="http://rubyforge.org/pipermail/backupgem-users">backupgem-users</a> </td>
+			<td> <a href="http://rubyforge.org/mailman/listinfo/backupgem-users">subscribe / unsubscribe</a> </td>
+			<td> The BackupGem users list is devoted to the discussion of and questions about the usage of Backup. If you can&#8217;t quite figure out how to get a feature of Backup to work, this is the list you would go to in order to ask your questions. </td>
+		</tr>
+		<tr>
+			<td> <a href="http://rubyforge.org/pipermail/backupgem-devel">backupgem-devel</a> </td>
+			<td> <a href="http://rubyforge.org/mailman/listinfo/backupgem-devel">subscribe / unsubscribe</a> </td>
+			<td> The Backup developers list is devoted to the discussion of Backup&#8217;s implementation. If you have created a patch that you would like to discuss, or if you would like to discuss a new feature, this is the list for you. </td>
+		</tr>
+	</table>
+  
+    <a name="Housekeeping_About_the_Author"
+    ></a><h3>About the Author</h3>
+    <p>Backup was written by <a href="mailto:nate@natemurray.com">Nate Murray</a>.</p>
+
+
+	<p>Nate currently works at an internet retailer in Southern California. Feel free to send him compliments, money, praise, or new feature patches. You can also send questions and suggestions. However, for bug reports and general feature requests, please use the trackers on the  <a href="http://rubyforge.org/projects/backupgem">BackupGem project page</a>.</p>
+  
+    <a name="Housekeeping_Special_Thanks"
+    ></a><h3>Special Thanks</h3>
+    <p>Special thanks to:</p>
+
+
+	<ul>
+	<li>Matt Pulver for help with various technical problems and ideas.</li>
+		<li>Jamis Buck for writing <a href="http://weblog.rubyonrails.com/2006/8/30/capistrano-1-1-9-beta">Capistrano</a>. Capistrano provided the inspiration and some code for this work. Additionally, the Net::SSH manual provided partial inspiration for this manual. </li>
+		<li><a href="mailto:info@digitalclash.com">Matthew Lipper</a> for writing the Runt Ruby Temporal Expressions Library</li>
+		<li><a href="http://whytheluckystiff.net/">why the lucky stiff</a> for inspiration and some of the code to generate this manual.</li>
+	</ul>
+   
+  
+
+        <div class="ad">
+
+            <script type="text/javascript"><!--
+            google_ad_client = "pub-0934913060779093";
+            google_ad_width = 728;
+            google_ad_height = 90;
+            google_ad_format = "728x90_as";
+            google_ad_type = "text_image";
+            //2006-10-06: backup_before_recipe_1
+            google_ad_channel ="7683863986";
+            //--></script>
+            <script type="text/javascript"
+              src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+            </script>
+
+        </div> 
+
+ <a name="How_Backup_Works"></a><h2>How Backup Works</h2>
+  
+    <a name="How_Backup_Works_A_Typical_Backup"
+    ></a><h3>A Typical Backup</h3>
+    <p>A typical backup has the following sequence:</p>
+
+
+	<ul>
+	<li>content</li>
+		<li>compress</li>
+		<li>encrypt</li>
+		<li>deliver</li>
+		<li>rotate</li>
+		<li>cleanup</li>
+	</ul>
+
+
+	<p>This order is the default, however, like most things it is customizable. Think of it like a pipline: the input of each step is the output of the last step.
+Each of these things are specified in a <code><span class="ident">recipe</span></code> file which is describe below.</p>
+  
+    <a name="How_Backup_Works_CLI"
+    ></a><h3>CLI</h3>
+    <div class='example'><pre><code>  <span class="constant">Usage</span><span class="punct">:</span> <span class="punct">./</span><span class="regex">backup [options]
+  Recipe Options -----------------------
+      -r, --recipe RECIPE              A recipe file to load.
+
+      -g, --global FILE                Specify the global recipe file to work
+                                       with. Defaults to the file +global.rb+
+                                       in the directory of +recipe+
+      -s, --set NAME=VALUE             Specify a variable and it's value to
+                                       set. This will be set after loading all
+                                       recipe files.</span></code></pre></div>
+
+	<p><code><span class="constant">Backup</span></code> <i>is still in an early version. For now, I run the script directly from its <code><span class="ident">bin</span></code> folder in <code><span class="global">$GEMSROOT</span></code>. This will be moved to something like <code><span class="punct">/</span><span class="regex">usr</span><span class="punct">/</span><span class="ident">local</span><span class="punct">/</span><span class="ident">lib</span></code> in a future version. Patches to do this are welcome.</i></p>
+
+
+	<p>For now, you can run backup like so:</p>
+
+
+<div class='example'><pre><code>  <span class="punct">/</span><span class="regex">usr</span><span class="punct">/</span><span class="ident">local</span><span class="punct">/</span><span class="ident">lib</span><span class="punct">/</span><span class="ident">ruby</span><span class="punct">/</span><span class="ident">gems</span><span class="punct">/</span><span class="number">1.8</span><span class="punct">/</span><span class="ident">gems</span><span class="punct">/</span><span class="ident">backupgem</span><span class="punct">-</span><span class="number">0.0</span><span class="punct">.</span><span class="number">2</span><span class="punct">/</span><span class="ident">bin</span><span class="punct">/</span><span class="ident">backup</span> <span class="punct">--</span><span class="ident">recipe</span> <span class="punct">/</span><span class="ident">path</span><span class="punct">/</span><span class="ident">to</span><span class="punct">/</span><span class="ident">examples</span><span class="punct">/</span><span class="ident">mediawiki</span><span class="punct">.</span><span class="ident">rb</span></code></pre></div>
+
+	<p>Usually, you would set this as a cron job or something similar.</p>
+   
+  
+
+
+ <a name="Backup_Recipe_File_Format"></a><h2>Backup Recipe File Format</h2>
+  
+    <a name="Backup_Recipe_File_Format_Recipes_Explained"
+    ></a><h3>Recipes Explained</h3>
+    <div class="longlist">
+
+	<ul>
+	<li>The Backup Recipe format is pure ruby code. Anything that is valid ruby is valid in the recipe file. There are, however, a number of shortcuts that will make your life easier.</li>
+		<li>Each of the steps are specified as an <code><span class="ident">action</span></code>. (An action is really nothing more than a method that becomes defined in the Actor instance. See the <a href="http://rubyforge.org/docman/?group_id=2110"><span class="caps">API</span> docs</a> if you&#8217;re interestd.)</li>
+		<li>You may create &#8220;hook&#8221; actions for any of the actions. So if you define a method <code><span class="ident">before_content</span></code> it will be called immediately before <code><span class="comment">#content</span></code> is called. A method named <code><span class="ident">after_rotation</span></code> would be called after <code><span class="comment">#rotation</span></code>. This may not always be needed as you can customize the rotation order by setting the <code><span class="ident">action_order</span></code>. See the <code><span class="ident">recipes</span><span class="punct">/</span><span class="ident">standard</span><span class="punct">.</span><span class="ident">rb</span></code> file for examples.</li>
+		<li>In each action, the variable <code><span class="ident">last_result</span></code> is set. This is the return value of the previously called method in the chain. Note that this includes the output of the &#8220;hook&#8221; methods. </li>
+		<li>All configuration variables are available to actions via the hash <code><span class="ident">c</span><span class="punct">[]</span></code>. For example, the backup path is available to your actions as <code><span class="ident">c</span><span class="punct">[</span><span class="symbol">:backup_path</span><span class="punct">]</span></code>.</li>
+	</ul>
+
+
+</div>
+  
+    <a name="Backup_Recipe_File_Format_Variables"
+    ></a><h3>Variables</h3>
+    <p>Setting variables is the bulk of the work you have to do when configuring your <code><span class="constant">Backup</span></code> scripts. These first two variables are required for all configurations.</p>
+
+
+	<p><i>The second variable could be omitted completely if the code was updated to use <code><span class="ident">tmpdir</span></code>. This is currently a <span class="caps">TODO</span>.</i></p>
+
+
+	<table>
+		<tr>
+			<th>Name </th>
+			<th>Desc.  </th>
+			<th>Example </th>
+		</tr>
+		<tr>
+			<td> :backup_path </td>
+			<td> The path to place backup archives. </td>
+			<td> <code><span class="ident">set</span> <span class="symbol">:backup_path</span><span class="punct">,</span> <span class="punct">&quot;</span><span class="string">/var/local/backups/mediawiki</span><span class="punct">&quot;</span></code> </td>
+		</tr>
+		<tr>
+			<td> :tmp_dir </td>
+			<td> Specify a directory that backup can use as a temporary directory. Default <code><span class="punct">/</span><span class="regex">tmp</span></code>.  </td>
+			<td> <code><span class="ident">set</span> <span class="symbol">:tmp_dir</span><span class="punct">,</span> <span class="constant">File</span><span class="punct">.</span><span class="ident">dirname</span><span class="punct">(</span><span class="constant">__FILE__</span><span class="punct">)</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">/../tmp</span><span class="punct">&quot;</span></code> </td>
+		</tr>
+	</table>
+
+
+
+
+	<p>The user running the script must have write permissions for each of these directories.</p>
+  
+    <a name="Backup_Recipe_File_Format_Content"
+    ></a><h3>Content</h3>
+    <p>The first step in any backup is to locate (or create) the content that is to be backed up. Backup provides a couple of shortcuts for common ways to locate content and allows you to arbitrarily define your own.
+Some typical types of content are:</p>
+
+
+	<ul>
+	<li>a particular file</li>
+		<li>a particular folder</li>
+		<li>the contents of a particular folder</li>
+	</ul>
+
+
+These could be specified like so:
+<div class='example'><pre><code>  <span class="ident">action</span> <span class="symbol">:content</span><span class="punct">,</span> <span class="symbol">:is_file</span>   <span class="punct">=&gt;</span> <span class="punct">&quot;</span><span class="string">/path/to/file</span><span class="punct">&quot;</span>               <span class="comment"># content is a single file</span>
+  <span class="ident">action</span> <span class="symbol">:content</span><span class="punct">,</span> <span class="symbol">:is_folder</span> <span class="punct">=&gt;</span> <span class="punct">&quot;</span><span class="string">/path/to/folder</span><span class="punct">&quot;</span>             <span class="comment"># content is the folder itself </span>
+  <span class="ident">action</span> <span class="symbol">:content</span><span class="punct">,</span> <span class="symbol">:is_contents_of</span> <span class="punct">=&gt;</span> <span class="punct">&quot;</span><span class="string">/path/to/other/folder</span><span class="punct">&quot;</span>  <span class="comment"># content is folder/* , recursive option</span></code></pre></div>
+If you want <code><span class="symbol">:content</span></code> to be a series of shell commands just pass <code><span class="comment">#action</span></code> a block:
+<div class='example'><pre><code>  <span class="ident">action</span><span class="punct">(</span><span class="symbol">:content</span><span class="punct">)</span> <span class="keyword">do</span> 
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">echo <span class="escape">\&quot;</span>hello $HOSTNAME<span class="escape">\&quot;</span></span><span class="punct">&quot;</span> 
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">mysqldump -uroot database &gt; /path/to/db.sql</span><span class="punct">&quot;</span> 
+    <span class="punct">&quot;</span><span class="string">/path/to/db.sql</span><span class="punct">&quot;</span> <span class="comment"># make sure you return the full path to the folder/file you wish to be the content </span>
+  <span class="keyword">end</span></code></pre></div>
+  
+    <a name="Backup_Recipe_File_Format_Compress"
+    ></a><h3>Compress</h3>
+    Next you may want to compress your content. Again, there are a few one-liners for common cases and you can create your own.
+<div class='example'><pre><code>  <span class="ident">action</span> <span class="symbol">:compress</span><span class="punct">,</span> <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:tar_bz2</span>  <span class="comment"># actually calls a method named tar_bz2 with output of &quot;:content&quot; ( or &quot;:after_content&quot; ) </span>
+  <span class="comment"># or</span>
+  <span class="ident">action</span> <span class="symbol">:compress</span><span class="punct">,</span> <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:tar_gzip</span></code></pre></div>
+Again, you can create your own.
+<div class='example'><pre><code>  <span class="ident">action</span><span class="punct">(</span><span class="symbol">:compress</span><span class="punct">)</span> 
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">my_tar  <span class="expr">#{last_result}</span> <span class="expr">#{last_result}</span>.tar</span><span class="punct">&quot;</span> 
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">my_bzip <span class="expr">#{last_result}</span>.tar <span class="expr">#{last_result}</span>.tar.bz2</span><span class="punct">&quot;</span> 
+    <span class="ident">last_result</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">.tar.bz2</span><span class="punct">&quot;</span> 
+  <span class="keyword">end</span></code></pre></div>
+  
+    <a name="Backup_Recipe_File_Format_Encrypt"
+    ></a><h3>Encrypt</h3>
+    Encryption is available to you, if you wish to use it.
+<div class='example'><pre><code>  <span class="ident">set</span> <span class="symbol">:encrypt</span><span class="punct">,</span> <span class="constant">true</span>                              <span class="comment"># default is +false+</span>
+  <span class="ident">set</span> <span class="symbol">:gpg_encrypt_options</span><span class="punct">,</span> <span class="punct">&quot;</span><span class="string">--default-recipient</span><span class="punct">&quot;</span> <span class="comment"># default is an empty string</span>
+  <span class="ident">action</span> <span class="symbol">:encrypt</span><span class="punct">,</span> <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:gpg</span> <span class="comment"># default, none</span></code></pre></div>
+or your own:
+<div class='example'><pre><code>  <span class="ident">action</span><span class="punct">(</span><span class="symbol">:encrypt</span><span class="punct">)</span>
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">gpg <span class="expr">#{c[:gpg_encrypt_options]}</span> --encrypt <span class="expr">#{last_result}</span></span><span class="punct">&quot;</span> 
+    <span class="ident">last_result</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">.gpg</span><span class="punct">&quot;</span>  
+  <span class="keyword">end</span></code></pre></div>
+
+	<p>I would recommend that you think seriously about how you wish to manage your keys for this backup process. If you are backing up encrypted data then you need to backup your keys or else risk losing access to your data. Secure key management is beyond the scope of this document.</p>
+  
+    <a name="Backup_Recipe_File_Format_Delivery"
+    ></a><h3>Delivery</h3>
+    <h4>Action</h4>
+
+
+	<p>Delivery is supported via <code><span class="ident">scp</span></code>, <code><span class="ident">ftp</span></code>, and <code><span class="ident">mv</span></code></p>
+
+
+	<p><i>Full <span class="caps">FTP</span> support is <a href="#Known_Bugs_and_Limitations_TODO">unfinished</a>. Currently, only <code><span class="ident">scp</span></code> and <code><span class="ident">mv</span></code> fully support rotation</i></p>
+
+
+<div class='example'><pre><code>  <span class="ident">action</span> <span class="symbol">:deliver</span><span class="punct">,</span> <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:scp</span>
+  <span class="ident">action</span> <span class="symbol">:deliver</span><span class="punct">,</span> <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:ftp</span>
+  <span class="ident">action</span> <span class="symbol">:deliver</span><span class="punct">,</span> <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:mv</span></code></pre></div>
+The <code><span class="symbol">:mv</span></code> action is defined (in <code><span class="ident">backup</span><span class="punct">/</span><span class="ident">recipes</span><span class="punct">/</span><span class="ident">standard</span><span class="punct">.</span><span class="ident">rb</span></code>) like any user-defined action:
+<div class='example'><pre><code>  <span class="ident">action</span><span class="punct">(</span><span class="symbol">:mv</span><span class="punct">)</span> <span class="keyword">do</span>
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">mv <span class="expr">#{last_result}</span> <span class="expr">#{c[:backup_path]}</span>/</span><span class="punct">&quot;</span> 
+    <span class="ident">c</span><span class="punct">[</span><span class="symbol">:backup_path</span><span class="punct">]</span> <span class="attribute">@</span> <span class="punct">&quot;</span><span class="string">/</span><span class="punct">&quot;</span> <span class="attribute">@</span> <span class="constant">File</span><span class="punct">.</span><span class="ident">basename</span><span class="punct">(</span><span class="ident">last_result</span><span class="punct">)</span>
+  <span class="keyword">end</span></code></pre></div>
+
+	<h4>Variables</h4>
+
+
+	<table>
+		<tr>
+			<th>Name </th>
+			<th>Desc.  </th>
+			<th>Example </th>
+		</tr>
+		<tr>
+			<td> <code><span class="symbol">:servers</span></code> </td>
+			<td> An array of host names to deliver the data to. <br /><strong><a href="#Known_Bugs_and_Limitations_TODO"><span class="caps">TODO</span></a> this currently supports one 1 server</strong>.  </td>
+			<td> <code><span class="ident">set</span> <span class="symbol">:servers</span><span class="punct">,</span>           <span class="punct">%w{</span><span class="string"> localhost </span><span class="punct">}</span></code> </td>
+		</tr>
+		<tr>
+			<td> <code><span class="symbol">:ssh_user</span></code> </td>
+			<td> The name of the ssh user on the foreign server. Default <span class="caps">ENV</span>[&#8216;USER&#8217;].  </td>
+			<td> <code><span class="ident">set</span> <span class="symbol">:ssh_user</span><span class="punct">,</span>          <span class="constant">ENV</span><span class="punct">['</span><span class="string">USER</span><span class="punct">']</span></code> </td>
+		</tr>
+		<tr>
+			<td> <code><span class="symbol">:identity_key</span></code> </td>
+			<td> The path to the key to use when ssh&#8217;ing into a foreign server.  </td>
+			<td> <code><span class="ident">set</span> <span class="symbol">:identity_key</span><span class="punct">,</span>      <span class="constant">ENV</span><span class="punct">['</span><span class="string">HOME</span><span class="punct">']</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">/.ssh/id_rsa</span><span class="punct">&quot;</span></code> </td>
+		</tr>
+	</table>
+  
+    <a name="Backup_Recipe_File_Format_Rotate"
+    ></a><h3>Rotate</h3>
+    <p>Rotation of your backups is a way to keep snapshot copies of your backups in time while not keeping every single backup for every single day. Currently the only form of rotation Backup supports is <a href="http://en.wikipedia.org/wiki/Grandfather-father-son">grandfather-father-son</a>. See <a href="http://en.wikipedia.org/wiki/Grandfather-father-son">Wikipedia</a> if you are unfamiliar with how this works.</p>
+
+
+<div class='example'><pre><code>  <span class="ident">set</span> <span class="symbol">:rotation_method</span><span class="punct">,</span>  <span class="symbol">:gfs</span> <span class="comment"># this is the default. you don't need to set it and there are no other supported options</span></code></pre></div>
+
+	<p>By deafult, a <code><span class="ident">son</span></code> is created daily, unless it is a day to create a <code><span class="ident">father</span></code> or <code><span class="ident">grandfather</span></code>.  It is assumed that every time you run Backup you want to create a backup. Therefore, if you do not want to a <code><span class="ident">son</span></code> (etc), do not run the program.  You can specify when a <code><span class="ident">son</span></code> is promoted to a <code><span class="ident">father</span></code> by the following variable:</p>
+
+
+<div class='example'><pre><code>  <span class="ident">set</span> <span class="symbol">:son_promoted_on</span><span class="punct">,</span>    <span class="symbol">:fri</span></code></pre></div>
+
+	<p>You specify when fathers are promoted to grandfathers by something like the following</p>
+
+
+<div class='example'><pre><code>  <span class="ident">set</span> <span class="symbol">:father_promoted_on</span><span class="punct">,</span> <span class="symbol">:last_fri_of_the_month</span></code></pre></div>
+
+	<p>Valid arguments for specifying these promotions are as follows:</p>
+
+
+	<ul>
+	<li><code><span class="symbol">:mon</span></code>-<code><span class="symbol">:sun</span></code> &#8211; A symbol of the abbreviation of any day of the week</li>
+		<li><code><span class="symbol">:last_</span><span class="punct">[</span><span class="ident">mon</span><span class="punct">-</span><span class="ident">sun</span><span class="punct">]</span><span class="ident">_of_the_month</span></code> &#8211; A symbol, replacing <code><span class="punct">[</span><span class="ident">mon</span><span class="punct">-</span><span class="ident">sun</span><span class="punct">]</span></code> with the
+    abbreviation for the day of the weeks. <br />
+    Example: <code><span class="symbol">:last_thu_of_the_month</span></code>.</li>
+		<li>Any valid <code><span class="constant">Runt</span></code> object.</li>
+	</ul>
+
+
+Representing these temporal ranges is done internally by using <code><span class="constant">Runt</span></code>. You are, therefore, allowed to pass in your own arbitrarily complex <code><span class="constant">Runt</span></code> object. For example, say that you wanted to promote to <code><span class="ident">father</span></code> on Monday, Wednesday and Friday. You could do the following:
+<div class='example'><pre><code>  <span class="ident">mon_wed_fri</span> <span class="punct">=</span> <span class="constant">Runt</span><span class="punct">::</span><span class="constant">DIWeek</span><span class="punct">.</span><span class="ident">new</span><span class="punct">(</span><span class="constant">Runt</span><span class="punct">::</span><span class="constant">Mon</span><span class="punct">)</span> <span class="punct">|</span> 
+                <span class="constant">Runt</span><span class="punct">::</span><span class="constant">DIWeek</span><span class="punct">.</span><span class="ident">new</span><span class="punct">(</span><span class="constant">Runt</span><span class="punct">::</span><span class="constant">Wed</span><span class="punct">)</span> <span class="punct">|</span> 
+                <span class="constant">Runt</span><span class="punct">::</span><span class="constant">DIWeek</span><span class="punct">.</span><span class="ident">new</span><span class="punct">(</span><span class="constant">Runt</span><span class="punct">::</span><span class="constant">Fri</span><span class="punct">)</span>
+  <span class="ident">set</span> <span class="symbol">:son_promoted_on</span><span class="punct">,</span> <span class="ident">mon_wed_fri</span></code></pre></div>
+
+	<p>See the <a href="http://runt.rubyforge.org/">Runt documentation</a> for more information on this.</p>
+
+
+	<p>You can set how many of each rank to keep:</p>
+
+
+<div class='example'><pre><code>  <span class="comment"># assuming daily backups...</span>
+  <span class="ident">set</span> <span class="symbol">:sons_to_keep</span><span class="punct">,</span>         <span class="number">14</span>   <span class="comment"># this would be two weeks</span>
+  <span class="ident">set</span> <span class="symbol">:fathers_to_keep</span><span class="punct">,</span>       <span class="number">6</span>
+  <span class="ident">set</span> <span class="symbol">:grandfathers_to_keep</span><span class="punct">,</span>  <span class="number">6</span></code></pre></div>
+   
+  
+
+
+ <a name="Examples"></a><h2>Examples</h2>
+  
+    <a name="Examples_Good_things_come_in_threes"
+    ></a><h3>Good things come in threes</h3>
+    <p>Here we will cover three examples. </p>
+
+
+	<ul>
+	<li>a super-simple backup to a local directory. This will show how easy
+    things can be.</li>
+		<li>a more complex implementation. This will show some of the variables
+    you can set and show how to use a foreign server.</li>
+		<li>an even more complex configuration. This will show how to define
+    your own methods and set more advanced variables.</li>
+	</ul>
+  
+    <a name="Examples_Example_One___Backup_a_Folder_of_Logs"
+    ></a><h3>Example One | Backup a Folder of Logs</h3>
+    <p>Our first example will be backing up a folder of logs. Say we have a folder <code><span class="punct">/</span><span class="regex">var</span><span class="punct">/</span><span class="ident">my_logs</span><span class="punct">/</span></code> and it is full of log files.</p>
+
+
+	<p>What we want to do is:</p>
+
+
+	<ul>
+	<li>move out all the old log files</li>
+		<li>compress them and store them in a local folder</li>
+		<li>store 2 weeks of daily backups (sons)</li>
+		<li>store a weekly backup (father) going back 6 weeks</li>
+		<li>and create a monthly backup on the last friday of every month (grandfather) for 6 months</li>
+	</ul>
+
+
+Thankfully, this is incredibly simple:
+<div class='example'><pre><code>  <span class="ident">set</span> <span class="symbol">:backup_path</span><span class="punct">,</span> <span class="punct">&quot;</span><span class="string">/var/local/backups/my_old_logs</span><span class="punct">&quot;</span> 
+  <span class="ident">set</span> <span class="symbol">:tmp_dir</span><span class="punct">,</span>     <span class="punct">&quot;</span><span class="string">/tmp</span><span class="punct">&quot;</span> <span class="comment"># this is the default so you actually dont have to specify it</span>
+  <span class="ident">action</span> <span class="symbol">:content</span><span class="punct">,</span>  <span class="symbol">:is_contents_of</span> <span class="punct">=&gt;</span> <span class="punct">&quot;</span><span class="string">/var/my_logs</span><span class="punct">&quot;</span></code></pre></div>
+
+	<p>And thats it!</p>
+
+
+	<p>Notice a couple of things here.</p>
+
+
+	<ol>
+	<li>Each time we <code><span class="ident">set</span></code> a variable that becomes available to the actions as <code><span class="ident">c</span><span class="punct">[</span><span class="symbol">:var</span><span class="punct">]</span></code></li>
+		<li>In this case, make sure that <code><span class="symbol">:backup_path</span></code> and <code><span class="symbol">:tmp_dir</span></code> are writable by the user that is running the backup script.</li>
+	</ol>
+  
+    <a name="Examples_Example_Two___SQL_Backup"
+    ></a><h3>Example Two | SQL Backup</h3>
+    <p>Our second example will be backing up a <a href="http://www.mediawiki.org">MediaWiki</a> installation.  Say we have a MySQL database named <code><span class="ident">mediawiki</span></code>.</p>
+
+
+	<p>This time we want to:</p>
+
+
+	<ul>
+	<li>create a dump of the database every day</li>
+		<li>compress this backup and store it in a local folder</li>
+		<li>store 2 weeks of daily backups (son) [<em>same as last time</em>]</li>
+		<li>store &#8220;father&#8221; backups every Monday, Wednesday and Friday going back 6 weeks</li>
+		<li>and create a monthly backup on the last Friday of every month (grandfather) for 6 months</li>
+	</ul>
+
+
+<div class='example'><pre><code>  <span class="ident">set</span> <span class="symbol">:backup_path</span><span class="punct">,</span> <span class="punct">&quot;</span><span class="string">/var/local/backups/mediawiki</span><span class="punct">&quot;</span> 
+
+  <span class="ident">action</span><span class="punct">(</span><span class="symbol">:content</span><span class="punct">)</span> <span class="keyword">do</span>
+    <span class="ident">dump</span> <span class="punct">=</span> <span class="ident">c</span><span class="punct">[</span><span class="symbol">:tmp_dir</span><span class="punct">]</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">/mediawiki.sql</span><span class="punct">&quot;</span> 
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">mysqldump -uroot mediawiki &gt; <span class="expr">#{dump}</span></span><span class="punct">&quot;</span> 
+    <span class="ident">dump</span> <span class="comment"># make sure you return the name of the file</span>
+  <span class="keyword">end</span>
+
+  <span class="ident">action</span> <span class="symbol">:deliver</span><span class="punct">,</span>  <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:scp</span>
+  <span class="ident">action</span> <span class="symbol">:rotate</span><span class="punct">,</span>   <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:via_ssh</span>
+
+  <span class="ident">set</span> <span class="symbol">:servers</span><span class="punct">,</span>           <span class="punct">%w{</span><span class="string"> my.server.com </span><span class="punct">}</span>
+
+  <span class="ident">set</span> <span class="symbol">:son_promoted_on</span><span class="punct">,</span>    <span class="symbol">:sun</span>
+  <span class="ident">set</span> <span class="symbol">:father_promoted_on</span><span class="punct">,</span> <span class="symbol">:last_sun_of_the_month</span>
+
+  <span class="ident">set</span> <span class="symbol">:sons_to_keep</span><span class="punct">,</span>         <span class="number">21</span>  
+  <span class="ident">set</span> <span class="symbol">:fathers_to_keep</span><span class="punct">,</span>      <span class="number">12</span>
+  <span class="ident">set</span> <span class="symbol">:grandfathers_to_keep</span><span class="punct">,</span> <span class="number">12</span></code></pre></div>
+
+	<p>A couple things to note:</p>
+
+
+	<ol>
+	<li>In this example, it is assumed that the current user running the
+   script has <code><span class="ident">ssh</span></code> keys configured for password-less login to
+   <code><span class="ident">my</span><span class="punct">.</span><span class="ident">server</span><span class="punct">.</span><span class="ident">com</span></code>. If you want to change the user to login as set the
+   variable <code><span class="symbol">:ssh_user</span></code>. You can also specify a key with
+   <code><span class="symbol">:identity_key</span></code>.</li>
+		<li>Number 1 is the only thing</li>
+	</ol>
+  
+    <a name="Examples_Example_Three___Something_more_complex"
+    ></a><h3>Example Three | Something more complex</h3>
+    <p>By now it should be easy to see what is going on here:</p>
+
+
+<div class='example'><pre><code>  <span class="ident">action</span> <span class="symbol">:content</span><span class="punct">,</span>  <span class="symbol">:is_file</span> <span class="punct">=&gt;</span> <span class="punct">&quot;</span><span class="string">/path/to/file.abc</span><span class="punct">&quot;</span> 
+  <span class="ident">action</span> <span class="symbol">:compress</span><span class="punct">,</span> <span class="symbol">:method</span>  <span class="punct">=&gt;</span> <span class="symbol">:my_tar_gzip</span>
+
+  <span class="ident">action</span><span class="punct">(</span><span class="symbol">:my_tar_gzip</span><span class="punct">)</span> <span class="keyword">do</span>
+    <span class="ident">name</span> <span class="punct">=</span> <span class="ident">c</span><span class="punct">[</span><span class="symbol">:tmp_dir</span><span class="punct">]</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">/</span><span class="punct">&quot;</span> <span class="punct">+</span> <span class="constant">File</span><span class="punct">.</span><span class="ident">basename</span><span class="punct">(</span><span class="ident">last_result</span><span class="punct">)</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">.tar.gzip</span><span class="punct">&quot;</span> 
+    <span class="ident">sh</span> <span class="punct">&quot;</span><span class="string">tar -czv --exclude .DS* --exclude CVS  <span class="expr">#{last_result}</span> &gt; <span class="expr">#{name}</span></span><span class="punct">&quot;</span> 
+    <span class="ident">name</span> <span class="comment"># make sure you return the name of the tar.gzip file</span>
+  <span class="keyword">end</span>
+
+  <span class="ident">set</span> <span class="symbol">:encrypt</span><span class="punct">,</span> <span class="constant">true</span>
+
+  <span class="ident">action</span> <span class="symbol">:deliver</span><span class="punct">,</span>  <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:scp</span>  
+  <span class="ident">action</span> <span class="symbol">:rotate</span><span class="punct">,</span>   <span class="symbol">:method</span> <span class="punct">=&gt;</span> <span class="symbol">:via_ssh</span>
+
+  <span class="ident">set</span> <span class="symbol">:ssh_user</span><span class="punct">,</span>          <span class="punct">&quot;</span><span class="string">backup_user</span><span class="punct">&quot;</span> 
+  <span class="ident">set</span> <span class="symbol">:identity_key</span><span class="punct">,</span>      <span class="constant">ENV</span><span class="punct">['</span><span class="string">HOME</span><span class="punct">']</span> <span class="punct">+</span> <span class="punct">&quot;</span><span class="string">/.ssh/backup_key</span><span class="punct">&quot;</span></code></pre></div>
+   
+  
+
+        <div class="ad">
+
+            <script type="text/javascript"><!--
+            google_ad_client = "pub-0934913060779093";
+            google_ad_width = 728;
+            google_ad_height = 90;
+            google_ad_format = "728x90_as";
+            google_ad_type = "text_image";
+            //2006-10-06: backup_before_recipe_1
+            google_ad_channel ="7683863986";
+            //--></script>
+            <script type="text/javascript"
+              src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+            </script>
+
+        </div> 
+
+ <a name="Known_Bugs_and_Limitations"></a><h2>Known Bugs and Limitations</h2>
+  
+    <a name="Known_Bugs_and_Limitations_TODO"
+    ></a><h3>TODO</h3>
+    <p>What is left to do:</p>
+
+
+	<ul>
+	<li>Finish <span class="caps">FTP</span> support</li>
+		<li>Add support for multiple backup servers</li>
+		<li>Add in better logging </li>
+		<li>Remove all the <code><span class="ident">tmp_dir</span></code> references. use and test the standard library <code><span class="ident">tmpdir</span></code></li>
+		<li>Continue testing it</li>
+	</ul>
+
+
+	<p>If you find yourself writing the code for <code><span class="constant">Backup</span></code> to fix these things, please consider <a href="http://rubyforge.org/mailman/listinfo/backupgem-devel">submitting your patch</a> for the benefit of the community.</p>
+  
+    <a name="Known_Bugs_and_Limitations_BUGS"
+    ></a><h3>BUGS</h3>
+    <ul>
+	<li>You can&#8217;t <code><span class="keyword">return</span></code> in the user-defined actions for some reason. I think this
+  has to do with the <code><span class="ident">instance_eval</span></code>. But still, I wouldn&#8217;t think it would
+  matter. I&#8217;d be interested in any suggestions on how to fix this.</li>
+		<li>Please submit other bugs via the trackers at the 
+  <a href="http://rubyforge.org/projects/backupgem">BackupGem project page</a>.</li>
+	</ul>
+   
+  
+
+
+</div> <!-- end content -->
+</div> <!-- end wrapper -->
+
+<div id="navigation">
+  <ol>
+
+  <li><a href="#Introduction">Introduction</a>
+    <ol>
+  
+      <li><a href="#Introduction_Welcome"
+          >Welcome</a></li>
+  
+    </ol>
+  </li>
+
+  <li><a href="#Housekeeping">Housekeeping</a>
+    <ol>
+  
+      <li><a href="#Housekeeping_Prerequisites"
+          >Prerequisites</a></li>
+  
+      <li><a href="#Housekeeping_Using_RubyGems"
+          >Using RubyGems</a></li>
+  
+      <li><a href="#Housekeeping_Using_svn"
+          >Using svn</a></li>
+  
+      <li><a href="#Housekeeping_License_Information"
+          >License Information</a></li>
+  
+      <li><a href="#Housekeeping_Support"
+          >Support</a></li>
+  
+      <li><a href="#Housekeeping_Mailing_Lists"
+          >Mailing Lists</a></li>
+  
+      <li><a href="#Housekeeping_About_the_Author"
+          >About the Author</a></li>
+  
+      <li><a href="#Housekeeping_Special_Thanks"
+          >Special Thanks</a></li>
+  
+    </ol>
+  </li>
+
+  <li><a href="#How_Backup_Works">How Backup Works</a>
+    <ol>
+  
+      <li><a href="#How_Backup_Works_A_Typical_Backup"
+          >A Typical Backup</a></li>
+  
+      <li><a href="#How_Backup_Works_CLI"
+          >CLI</a></li>
+  
+    </ol>
+  </li>
+
+  <li><a href="#Backup_Recipe_File_Format">Backup Recipe File Format</a>
+    <ol>
+  
+      <li><a href="#Backup_Recipe_File_Format_Recipes_Explained"
+          >Recipes Explained</a></li>
+  
+      <li><a href="#Backup_Recipe_File_Format_Variables"
+          >Variables</a></li>
+  
+      <li><a href="#Backup_Recipe_File_Format_Content"
+          >Content</a></li>
+  
+      <li><a href="#Backup_Recipe_File_Format_Compress"
+          >Compress</a></li>
+  
+      <li><a href="#Backup_Recipe_File_Format_Encrypt"
+          >Encrypt</a></li>
+  
+      <li><a href="#Backup_Recipe_File_Format_Delivery"
+          >Delivery</a></li>
+  
+      <li><a href="#Backup_Recipe_File_Format_Rotate"
+          >Rotate</a></li>
+  
+    </ol>
+  </li>
+
+  <li><a href="#Examples">Examples</a>
+    <ol>
+  
+      <li><a href="#Examples_Good_things_come_in_threes"
+          >Good things come in threes</a></li>
+  
+      <li><a href="#Examples_Example_One___Backup_a_Folder_of_Logs"
+          >Example One | Backup a Folder of Logs</a></li>
+  
+      <li><a href="#Examples_Example_Two___SQL_Backup"
+          >Example Two | SQL Backup</a></li>
+  
+      <li><a href="#Examples_Example_Three___Something_more_complex"
+          >Example Three | Something more complex</a></li>
+  
+    </ol>
+  </li>
+
+  <li><a href="#Known_Bugs_and_Limitations">Known Bugs and Limitations</a>
+    <ol>
+  
+      <li><a href="#Known_Bugs_and_Limitations_TODO"
+          >TODO</a></li>
+  
+      <li><a href="#Known_Bugs_and_Limitations_BUGS"
+          >BUGS</a></li>
+  
+    </ol>
+  </li>
+
+</ol>
+
+</div>
+
+<div id="extra">
+  <ul>
+  <li><a href="http://tech.natemurray.com">tech.natemurray.com</a></li>
+</ul>
+
+</div>
+
+<div id="footer">
+  <p>
+ &copy; 2006 <a href="mailto:nate+backupgem@natemurray.com">Nate Murray</a>. <span class="last_updated">Last updated Tue Oct 10 09:20:53 PDT 2006</span>
+</p>
+
+</div>
+
+
+</div> <!-- end container -->
+</body>
+</html>

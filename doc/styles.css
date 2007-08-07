@@ -1,0 +1,157 @@
+/* Layout */
+html,body{margin:0;padding:0}
+body{font: 100% arial,sans-serif}
+p{margin:0 10px 10px}
+a{color: #981793;}
+div#header h1{height:80px;line-height:80px;margin:0;
+  padding-left:10px;background: #EEE;color: #79B30B}
+div#content p{line-height:1.4}
+div#navigation{background:#B9CAFF}
+div#extra{background:#FF8539}
+div#footer{background: #333;color: #FFF}
+div#footer p{margin:0;padding:5px 10px}
+div#wrapper{float:right;width:100%;margin-left:-205px}
+div#content{margin-left:205px}
+
+div#navigation {
+  float:left;
+  width:200px;
+  margin-right: 5px;
+}
+
+div#extra{float:left;clear:left;width:200px}
+div#footer{clear:both;width:100%}
+
+
+/* Styles */
+body {
+    background-color: white;
+    color: #222;
+    font-family: Georgia, Times, serif;
+    line-height: 110%;
+}
+
+/* Code styling */
+.example {
+    border: solid 1px #C9B;
+    background-color: #FFF5F9;
+    padding: 3px;
+    margin: 5px 40px 5px 22px;
+}
+
+pre {
+    background-color: #FFFEF9;
+    color: #936;
+    padding: 5px;
+    margin: 0px;
+    line-height: 170%;
+}
+
+blockquote code, p code, li code {
+    color: #936;
+    font-style: normal;
+    background-color: #FFFEF9;
+    padding: 2px;
+    line-height: 170%;
+    font-size: 12pt;
+}
+
+p code, li code {
+  line-height: 100%;
+  padding: 0px;
+  font-size: 130%;
+}
+
+blockquote code {
+    padding: 5px;
+    font-size: .9em;
+}
+
+div#content li {
+  margin-bottom: 5px;
+}
+
+div.longlist li  {
+  padding-bottom: 8px;
+}
+
+.last_updated {
+  margin-left: 60%;
+  text-align: right;
+  font-size:80%;
+}
+
+
+/* syntax highlighting */
+.keyword {
+    font-weight: bold;
+}
+.comment {
+    color: #555;
+}
+.string, .number {
+    color: #396;
+}
+.string {
+    background-color: #E9F5F5;
+}
+.regex {
+    background-color: #E9F1F5;
+    color: #435;
+}
+.ident {
+    color: #369;
+}
+.symbol {
+    color: #000;
+}
+.constant, .class {
+    color: #630;
+    font-weight: bold;
+}
+
+/* tables */
+table {
+  margin: 1em 1em 1em 0;
+  background: #f9f9f9;
+  border: 1px #aaaaaa solid;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px #aaaaaa solid;
+  padding: 0.2em;
+}
+
+th {
+  background: #f2f2f2;
+  text-align: center;
+}
+
+/* navigation */
+div#navigation a, div#extra a {
+  color: #08052B;
+  text-decoration: none;
+}
+
+div#navigation a:hover, div#extra a:hover {
+  text-decoration: underline;
+}
+
+div#navigation ol, div#extra ul {
+  margin-left: 6px;
+  padding-left: 20px;
+}
+
+div#navigation ol ol {
+  padding-left: 20px;
+}
+
+div#navigation ol ol li a, ol ol li {
+  color: #424E75;
+  font-size: 90%;
+}
+
+.rightad {
+  float: right;
+}

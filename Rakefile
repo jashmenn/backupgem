@@ -6,13 +6,13 @@ require 'rake/testtask'
 
 spec = Gem::Specification.new do |s|
   s.name = 'backupgem'
-  s.version = '0.0.9'
+  s.version = '0.0.11'
   s.author = "Nate Murray"
   s.email = "nate@natemurray.com"
   s.homepage = "http://tech.natemurray.com/backup"
   s.platform = Gem::Platform::RUBY
   s.summary = "Beginning-to-end solution for backups and rotation."
-  s.files = FileList["{bin,lib,tests,examples,doc}/**/*.{txt,html,css}"].to_a
+  s.files = FileList["{bin,lib,tests,examples,doc}/**/*"].to_a
   s.require_path = "lib"
   s.autorequire = "backupgem"
   s.test_files = FileList["{tests}/**/*test.rb"].to_a
