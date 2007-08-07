@@ -1,4 +1,18 @@
 = Backup Changelog
+== Version 0.0.11
+* Removed the tmpdir directive because it was screwing up the meta-code
+* Moved the graffle and keynote files to an "extras" directory because it was breaking windows machines
+
+== Version 0.0.10
+* added a rubyforge rake task. This doesnt affect anyone but me so there is no gem for it.
+
+== Version 0.0.9
+* mercurial support
+* multiple backups per day
+* and a variety of bug fixes from patches submitted from the community. Its a
+  little bit closer to windows ready (thanks Jonathan Stott!) because of
+  increased use of FileUtils over "sh".
+
 == Version 0.0.8
 * The attached patch will add the 'backup' executable to your bin path using
    the built-in RubyGems method for adding things to bin. Thanks to Anthony
