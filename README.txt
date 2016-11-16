@@ -48,7 +48,8 @@ Feel free to browse the releases or trunk [[here]].
 
 ===License Information===
 Backup is made available under the terms of the MIT License.  See the LICENSE
-file in the <tt>doc</tt> subdirectory of the Backup distribution.
+file in the <tt>doc</tt> subdirectory of the Backup distribution for the full
+text of this license.
 
 If you desire permission to use Backup in a manner incompatible with these
 licenses, please contact the copyright holder ([[mailto:nate@natemurray.com
