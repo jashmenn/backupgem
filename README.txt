@@ -47,17 +47,13 @@ Feel free to browse the releases or trunk [[here]].
   svn+ssh://blar blar blar
 
 ===License Information===
-Backup is made available under either the BSD license, or the same license Ruby
-(which, by extension, also allows the GPL as a permissable license as well).
-You can view the full text of any of these licenses in the <tt>doc</tt> subdirectory
-of the Backup distrubtion. The texts of the BSD and GPL licenses are also
-available online: "BSD":http://www.opensource.org/licenses/bsd-license.php and
-"GPL":http://www.opensource.org/licenses/gpl-license.php.
+Backup is made available under the terms of the MIT License.  See the LICENSE
+file in the <tt>doc</tt> subdirectory of the Backup distribution for the full
+text of this license.
 
-If you desire permission to use either Backup in a manner incompatible with
-these licenses, please contact the copyright holder
-([[mailto:nate@natemurray.com Nate Murray]] in order to negotiate a more
-compatible license.
+If you desire permission to use Backup in a manner incompatible with these
+licenses, please contact the copyright holder ([[mailto:nate@natemurray.com
+Nate Murray]] in order to negotiate a more compatible license.
 
 ===Support===
 Mailing lists, bug trackers, feature requests, and public forums are all
